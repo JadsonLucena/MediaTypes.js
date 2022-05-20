@@ -57,6 +57,44 @@ class MimeTypes {
 
     }
 
+    #loadApache = async res => {
+
+        try {
+
+            return {
+                version: res.headers.get('etag'),
+                content: (await res.text()).split(/\n+/).filter(line => !/^#.*/.test(line) && line.trim() != '').reduce((curr, line) => {
+
+                    line = line.split(/\t+/);
+
+                    if (line.length > 1) {
+
+                       let mimeType = line[0].trim().toLowerCase();
+                       let extensions = line[1].split(/\s+/).map(ext => ext.trim().toLowerCase()).filter(ext => ext);
+
+                        if (mimeType != '' && extensions.length) {
+
+                            curr[mimeType] = extensions;
+
+                        }
+
+                    }
+
+                    return curr;
+
+                }, {})
+            };
+
+        } catch (err) {
+
+            console.error(err);
+
+            return null;
+
+        }
+
+    }
+
     get list() {  
 
         return this.#mimeTypes;
