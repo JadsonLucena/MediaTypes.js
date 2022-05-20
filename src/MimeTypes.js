@@ -4,6 +4,7 @@ const { parse } = require('path');
 class MimeTypes {
 
     #mimeTypes;
+    #versions;
 
     constructor() {
 
@@ -16,6 +17,35 @@ class MimeTypes {
             this.#mimeTypes = {};
 
         }
+
+
+        try {
+
+            this.#versions = JSON.parse(fs.readFileSync('versions.json').toString('utf8'));
+
+        } catch (err) {
+
+            this.#versions = {
+                apache: null,
+                debian:  null,
+                iana: {
+                    application: null,
+                    audio: null,
+                    font: null,
+                    image: null,
+                    message: null,
+                    model: null,
+                    multipart: null,
+                    text: null,
+                    video: null
+                },
+                nginx: null
+            };
+
+        }
+
+
+        this.#update();
 
     }
 
@@ -176,6 +206,186 @@ class MimeTypes {
             console.error(err);
 
             return null;
+
+        }
+
+    }
+
+    #update = () => {
+
+        try {
+
+            Promise.allSettled([
+                fetch('https://raw.githubusercontent.com/apache/httpd/trunk/docs/conf/mime.types', { // https://github.com/apache/httpd/blob/trunk/docs/conf/mime.types
+                    method: 'HEAD',
+                    headers: {
+                        'Accept-Encoding': 'identity'
+                    }
+                }).then(res => {
+
+                    if (res.status == 200 && res.headers.get('etag') != this.#versions.apache) {
+
+                        return fetch('https://raw.githubusercontent.com/apache/httpd/trunk/docs/conf/mime.types', {
+                            headers: {
+                                'Accept-Encoding': 'identity'
+                            }
+                        });
+
+                    }
+
+                }),
+                fetch('https://salsa.debian.org/debian/media-types/-/raw/master/mime.types', { // https://salsa.debian.org/debian/media-types/-/blob/master/mime.types
+                    method: 'HEAD',
+                    headers: {
+                        'Accept-Encoding': 'identity'
+                    }
+                }).then(res => {
+
+                    if (res.status == 200 && res.headers.get('etag') != this.#versions.debian) {
+
+                        return fetch('https://salsa.debian.org/debian/media-types/-/raw/master/mime.types', {
+                            headers: {
+                                'Accept-Encoding': 'identity'
+                            }
+                        });
+
+                    }
+
+                }),
+                fetch('https://raw.githubusercontent.com/nginx/nginx/master/conf/mime.types', { // https://github.com/nginx/nginx/blob/master/conf/mime.types
+                    method: 'HEAD',
+                    headers: {
+                        'Accept-Encoding': 'identity'
+                    }
+                }).then(res => {
+
+                    if (res.status == 200 && res.headers.get('etag') != this.#versions.nginx) {
+
+                        return fetch('https://raw.githubusercontent.com/nginx/nginx/master/conf/mime.types', {
+                            headers: {
+                                'Accept-Encoding': 'identity'
+                            }
+                        });
+
+                    }
+
+                })
+            ].concat([ // https://www.iana.org/assignments/media-types/media-types.xhtml
+                'https://www.iana.org/assignments/media-types/application.csv',
+                'https://www.iana.org/assignments/media-types/audio.csv',
+                'https://www.iana.org/assignments/media-types/font.csv',
+                'https://www.iana.org/assignments/media-types/image.csv',
+                'https://www.iana.org/assignments/media-types/message.csv',
+                'https://www.iana.org/assignments/media-types/model.csv',
+                'https://www.iana.org/assignments/media-types/multipart.csv',
+                'https://www.iana.org/assignments/media-types/text.csv',
+                'https://www.iana.org/assignments/media-types/video.csv'
+            ].map(url => fetch(url, {
+                method: 'HEAD',
+                headers: {
+                    'Accept-Encoding': 'identity',
+                    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36'
+                }
+            }).then(res => {
+
+                let type = url.split('/').pop().replace('.csv', '');
+
+                if (res.status == 200 && res.headers.get('last-modified') != this.#versions.iana?.[type]) {
+
+                    return fetch(url, {
+                        headers: {
+                            'Accept-Encoding': 'identity',
+                            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36'
+                        }
+                    });
+
+                }
+
+            })))).then(async results => {
+
+                let updated = false;
+
+                if (results[0].status == 'fulfilled' && results[0].value) {
+
+                    let load = await this.#loadApache(results[0].value);
+
+                    if (load) {
+
+                        this.#versions.apache = load.version;
+
+                        this.#updateList(load.content);
+
+                        updated = true;
+
+                    }
+
+                }
+
+                if (results[1].status == 'fulfilled' && results[1].value) {
+
+                    let load = await this.#loadDebian(results[1].value);
+
+                    if (load) {
+
+                        this.#versions.debian = load.version;
+
+                        this.#updateList(load.content);
+
+                        updated = true;
+
+                    }
+
+                }
+
+                if (results[2].status == 'fulfilled' && results[2].value) {
+
+                    let load = await this.#loadNGINX(results[2].value);
+
+                    if (load) {
+
+                        this.#versions.nginx = load.version;
+
+                        this.#updateList(load.content);
+
+                        updated = true;
+
+                    }
+
+                }
+
+                for (let res of results.slice(3)) {
+
+                    if (res.status == 'fulfilled' && res.value) {
+
+                        let load = await this.#loadIANA(res.value);
+
+                        if (load) {
+
+                            this.#versions.iana[res.value.url.split('/').pop().replace('.csv', '')] = load.version;
+
+                            this.#updateList(load.content);
+
+                            updated = true;
+
+                        }
+
+                    }
+
+                }
+
+
+                if (updated) {
+
+                    fs.writeFileSync('mimetypes.json', JSON.stringify(this.#mimeTypes));
+                    fs.writeFileSync('versions.json', JSON.stringify(this.#versions));
+
+                }
+
+            });
+
+        } catch (err) {
+
+            console.error(err);
 
         }
 
