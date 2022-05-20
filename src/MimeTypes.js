@@ -5,8 +5,10 @@ class MimeTypes {
 
     #mimeTypes;
     #versions;
+    #updateInterval;
+    #updateLoop;
 
-    constructor() {
+    constructor(updateInterval = 86400000) {
 
         try {
 
@@ -46,6 +48,8 @@ class MimeTypes {
 
 
         this.#update();
+
+        this.#updateInterval = updateInterval;
 
     }
 
@@ -391,11 +395,25 @@ class MimeTypes {
 
     }
 
-    get list() {  
 
-        return this.#mimeTypes;
+    get list() { return this.#mimeTypes; }
+    get updateInterval() { return this.#updateInterval; }
+
+
+    set updateInterval(updateInterval = 86400000) {
+
+        this.#updateInterval = updateInterval;
+
+        clearInterval(this.#updateLoop);
+
+        if (this.#updateInterval >= 0) {
+
+            this.#updateLoop = setInterval(this.#update, this.#updateInterval);
+
+        }
 
     }
+
 
     get(path) {
 
