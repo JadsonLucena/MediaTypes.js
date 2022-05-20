@@ -101,6 +101,40 @@ class MimeTypes {
 
     }
 
+    #loadNGINX = async res => {
+
+        try {
+
+            return {
+                version: res.headers.get('etag'),
+                content: (await res.text()).replace(/(\s*types\s*{\s*|\s*}\s*)/ig, '').split(';').filter(line => !/^#.*/.test(line) && line.trim() != '').reduce((curr, line) => {
+
+                    line = line.match(/^\s*(?<mimeType>[^\s]+)\s+(?<extensions>.*)\s*$/);
+
+                    let mimeType = line.groups.mimeType.trim().toLowerCase();
+                    let extensions = line.groups.extensions.split(/\s+/).map(ext => ext.trim().toLowerCase()).filter(ext => ext);
+
+                    if (mimeType != '' && extensions.length) {
+
+                        curr[mimeType] = extensions;
+
+                    }
+
+                    return curr;
+
+                }, {})
+            };
+
+        } catch (err) {
+
+            console.error(err);
+
+            return null;
+
+        }
+
+    }
+
     get list() {  
 
         return this.#mimeTypes;
