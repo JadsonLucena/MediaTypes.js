@@ -45,6 +45,33 @@ class MimeTypes {
 
     }
 
+    append(mimeType, extension) {
+
+        extension = [].concat(extension);
+
+        if (typeof mimeType != 'string' || !mimeType.trim() || !/^.+\/.+$/i.test(mimeType)) {
+
+            throw new TypeError('Unsupported mimeType');
+
+        } else if (!extension.every(extension => typeof extension == 'string' && extension.trim() && /^[a-z0-9-_+.~%]+$/i.test(extension))) {
+
+            throw new TypeError('Unsupported extension');
+
+        }
+
+
+        let content = {};
+        content[mimeType] = extension;
+
+
+        if (this.#updateList(content)) {
+
+            fs.writeFileSync('mimetypes.json', JSON.stringify(this.#mimeTypes));
+
+        }
+
+    }
+
 }
 
 
