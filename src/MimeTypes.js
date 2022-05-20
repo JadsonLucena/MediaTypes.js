@@ -18,6 +18,12 @@ class MimeTypes {
 
     }
 
+    get list() {  
+
+        return this.#mimeTypes;
+
+    }
+
 }
 
 
