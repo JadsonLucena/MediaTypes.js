@@ -135,6 +135,52 @@ class MimeTypes {
 
     }
 
+    #loadIANA = async res => {
+
+        try {
+
+            return {
+                version: res.headers.get('last-modified'),
+                content: (await res.text()).split(/\n+/).slice(1).filter(line => !/^#.*/.test(line) && line.trim() != '').reduce((curr, line) => {
+
+                    line = line.split(',');
+
+                    if (line.length > 1) {
+
+                        let extension = line[0].trim().toLowerCase();
+                        let mimeType = line[1].trim().toLowerCase();
+
+                        if (mimeType != '' && extension != '' && !/^.*(obsoleted?|deprecated?).*$/i.test(extension)) {
+
+                            if (!(mimeType in curr)) {
+
+                                curr[mimeType] = [ extension ];
+
+                            } else if (!curr[mimeType].includes(extension)) {
+
+                                curr[mimeType].push(extension);
+
+                            }
+
+                        }
+
+                    }
+
+                    return curr;
+
+                }, {})
+            };
+
+        } catch (err) {
+
+            console.error(err);
+
+            return null;
+
+        }
+
+    }
+
     get list() {  
 
         return this.#mimeTypes;
