@@ -19,6 +19,44 @@ class MimeTypes {
 
     }
 
+    #updateList(content) {
+
+        let updated = false;
+
+        for (let mimeType in content) {
+
+            mimeType = mimeType.trim().toLowerCase();
+
+            if (mimeType in this.#mimeTypes) {
+
+                content[mimeType].forEach(extension => {
+
+                    extension = extension.trim().toLowerCase();
+
+                    if (!this.#mimeTypes[mimeType].includes(extension)) {
+
+                        this.#mimeTypes[mimeType].push(extension);
+
+                        updated = true;
+
+                    }
+
+                });
+
+            } else {
+
+                this.#mimeTypes[mimeType] = content[mimeType];
+
+                updated = true;
+
+            }
+
+        }
+
+        return updated;
+
+    }
+
     get list() {  
 
         return this.#mimeTypes;
