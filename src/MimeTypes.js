@@ -95,6 +95,12 @@ class MimeTypes {
 
     }
 
+    #loadDebian = async res => {
+
+        return await this.#loadApache(res);
+
+    }
+
     get list() {  
 
         return this.#mimeTypes;
