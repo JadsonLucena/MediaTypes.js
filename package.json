@@ -1,0 +1,36 @@
+{
+    "name": "@jadsonlucena/mimetypes",
+    "version": "0.1.0",
+    "description": "This is a comprehensive compilation of mime types that is periodically updated through the following projects: Apache, NGINX, IANA and Debian",
+    "main": "./src/MymeTypes.js",
+    "engines": {
+      "node": ">=18"
+    },
+    "scripts": {
+      "ci": "exit 0",
+      "test": "exit 0"
+    },
+    "files": [
+      "src/",
+      "README.md",
+      "LICENSE"
+    ],
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/JadsonLucena/MimeTypes.js.git"
+    },
+    "keywords": [
+      "mimetypes",
+      "mime.types",
+      "mime types",
+      "media types",
+      "content-type",
+      "accept"
+    ],
+    "author": "JadsonLucena <jadsonlucena@gmail.com> (https://github.com/JadsonLucena)",
+    "license": "MIT",
+    "bugs": {
+      "url": "https://github.com/JadsonLucena/MimeTypes.js/issues"
+    },
+    "homepage": "https://github.com/JadsonLucena/MimeTypes.js#readme"
+  }
