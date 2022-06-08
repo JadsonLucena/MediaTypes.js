@@ -43,3 +43,7 @@ get(
 // Listeners
 on(name: 'updated', callback: (mimeType: string, extensions: string[]) => void): void
 ```
+
+
+## QuickStart
+[![Edit MimeType.mjs](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/async-cache-6m2we0?autoresize=1&expanddevtools=1&fontsize=14&hidenavigation=1&theme=dark)
