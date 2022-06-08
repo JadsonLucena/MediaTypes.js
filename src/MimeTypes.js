@@ -1,7 +1,8 @@
 const fs = require('fs');
 const { parse } = require('path');
+const EventEmitter = require('events');
 
-class MimeTypes {
+class MimeTypes extends EventEmitter {
 
     #mimeTypes;
     #versions;
@@ -9,6 +10,11 @@ class MimeTypes {
     #updateLoop;
 
     constructor(updateInterval = 86400000) {
+
+        super({captureRejections: true});
+
+        this.setMaxListeners(0);
+
 
         try {
 
@@ -71,6 +77,8 @@ class MimeTypes {
 
                         this.#mimeTypes[mimeType].push(extension);
 
+                        this.emit('updated', mimeType, extension);
+
                         updated = true;
 
                     }
@@ -80,6 +88,8 @@ class MimeTypes {
             } else {
 
                 this.#mimeTypes[mimeType] = content[mimeType];
+
+                this.emit('updated', mimeType, content[mimeType]);
 
                 updated = true;
 
