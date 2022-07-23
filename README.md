@@ -10,7 +10,7 @@ A file's extension has no meaning on the web. In order for the client to interpr
 ```typescript
 // Constructor
 constructor(
-    updateInterval?: number = 86400000 // The time, in milliseconds. if less than zero, periodic update will be disabled.
+    updateInterval?: number = 86400000 // Periodic database update in milliseconds. if less than zero, will be disabled
 )
 ```
 
@@ -37,6 +37,8 @@ append(
 get(
     path: string // https://nodejs.org/api/path.html#pathparsepath
 ): string[] // MIME type list
+
+update(): void // database update
 ```
 
 ```typescript
