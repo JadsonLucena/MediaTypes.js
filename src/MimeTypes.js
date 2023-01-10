@@ -53,7 +53,7 @@ class MimeTypes extends EventEmitter {
         }
 
 
-        try {
+        /*try {
 
             this.update();
 
@@ -61,7 +61,7 @@ class MimeTypes extends EventEmitter {
 
             console.error(err);
 
-        }
+        }*/
 
 
         this.updateInterval = updateInterval;
