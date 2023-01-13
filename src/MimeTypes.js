@@ -2,6 +2,13 @@ const fs = require('fs');
 const { parse } = require('path');
 const EventEmitter = require('events');
 
+// https://www.rfc-editor.org/rfc/rfc6838#section-4.2
+/*
+https://github.com/jshttp/media-typer/blob/master/index.js
+const SUBTYPE_NAME_REGEXP = new Regex('^[a-z0-9][a-z0-9!#$&^_.-]{0,126}$', 'i')
+const TYPE_NAME_REGEXP = new Regex('^[a-z0-9][a-z0-9!#$&^_-]{0,126}$', 'i')
+const TYPE_REGEXP = new Regex('^\s*([a-z0-9][a-z0-9!#$&^_-]{0,126})\/([a-z0-9][a-z0-9!#$&^_.+-]{0,126})\s*$', 'i')
+*/
 class MimeTypes extends EventEmitter {
 
     #mimeTypes;
@@ -18,7 +25,7 @@ class MimeTypes extends EventEmitter {
 
         try {
 
-            this.#mimeTypes = JSON.parse(fs.readFileSync('mimetypes.json').toString('utf8'));
+            this.#mimeTypes = JSON.parse(fs.readFileSync(__dirname +'/mimetypes.json').toString('utf8'));
 
         } catch (err) {
 
@@ -29,7 +36,7 @@ class MimeTypes extends EventEmitter {
 
         try {
 
-            this.#versions = JSON.parse(fs.readFileSync('versions.json').toString('utf8'));
+            this.#versions = JSON.parse(fs.readFileSync(__dirname +'/versions.json').toString('utf8'));
 
         } catch (err) {
 
@@ -397,8 +404,8 @@ class MimeTypes extends EventEmitter {
 
             if (updated) {
 
-                fs.writeFileSync('mimetypes.json', JSON.stringify(this.#mimeTypes));
-                fs.writeFileSync('versions.json', JSON.stringify(this.#versions));
+                fs.writeFileSync(__dirname +'/mimetypes.json', JSON.stringify(this.#mimeTypes));
+                fs.writeFileSync(__dirname +'/versions.json', JSON.stringify(this.#versions));
 
             }
 
@@ -487,7 +494,7 @@ class MimeTypes extends EventEmitter {
 
         if (this.#updateList(content)) {
 
-            fs.writeFileSync('mimetypes.json', JSON.stringify(this.#mimeTypes));
+            fs.writeFileSync(__dirname +'/mimetypes.json', JSON.stringify(this.#mimeTypes));
 
         }
 
