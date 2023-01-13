@@ -43,7 +43,7 @@ update(): void // database update
 
 ```typescript
 // Listeners
-on(name: 'updated', callback: (mimeType: string, extensions: string[]) => void): void
+on(name: 'update', callback: (mimeType: string, extensions: string[]) => void): void
 ```
 
 

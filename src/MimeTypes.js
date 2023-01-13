@@ -77,7 +77,7 @@ class MimeTypes extends EventEmitter {
 
     #updateList(content) {
 
-        let updated = false;
+        let list = {};
 
         for (let mimeType in content) {
 
@@ -93,9 +93,7 @@ class MimeTypes extends EventEmitter {
 
                         this.#mimeTypes[mimeType].push(extension);
 
-                        this.emit('updated', mimeType, extension);
-
-                        updated = true;
+                        list[mimeType] = (list[mimeType] || []).concat(extension);
 
                     }
 
@@ -103,17 +101,15 @@ class MimeTypes extends EventEmitter {
 
             } else {
 
-                this.#mimeTypes[mimeType] = content[mimeType];
+                this.#mimeTypes[mimeType] = content[mimeType].map(extension => extension.trim().toLowerCase());
 
-                this.emit('updated', mimeType, content[mimeType]);
-
-                updated = true;
+                list[mimeType] = this.#mimeTypes[mimeType];
 
             }
 
         }
 
-        return updated;
+        return list;
 
     }
 
@@ -331,7 +327,7 @@ class MimeTypes extends EventEmitter {
 
         })))).then(async results => {
 
-            let updated = false;
+            let list = {};
 
             if (results[0].status == 'fulfilled' && results[0].value) {
 
@@ -341,9 +337,10 @@ class MimeTypes extends EventEmitter {
 
                     this.#versions.apache = load.version;
 
-                    this.#updateList(load.content);
-
-                    updated = true;
+                    list.apache = {
+                        content: this.#updateList(load.content),
+                        version: load.version
+                    };
 
                 }
 
@@ -357,9 +354,10 @@ class MimeTypes extends EventEmitter {
 
                     this.#versions.debian = load.version;
 
-                    this.#updateList(load.content);
-
-                    updated = true;
+                    list.debian = {
+                        content: this.#updateList(load.content),
+                        version: load.version
+                    };
 
                 }
 
@@ -373,9 +371,10 @@ class MimeTypes extends EventEmitter {
 
                     this.#versions.nginx = load.version;
 
-                    this.#updateList(load.content);
-
-                    updated = true;
+                    list.nginx = {
+                        content: this.#updateList(load.content),
+                        version: load.version
+                    };
 
                 }
 
@@ -391,9 +390,10 @@ class MimeTypes extends EventEmitter {
 
                         this.#versions.iana[res.value.url.split('/').pop().replace('.csv', '')] = load.version;
 
-                        this.#updateList(load.content);
-
-                        updated = true;
+                        list.iana = {
+                            content: this.#updateList(load.content),
+                            version: load.version
+                        };
 
                     }
 
@@ -402,12 +402,16 @@ class MimeTypes extends EventEmitter {
             }
 
 
-            if (updated) {
+            if (Object.keys(list).length) {
 
                 fs.writeFileSync(__dirname +'/mimetypes.json', JSON.stringify(this.#mimeTypes));
                 fs.writeFileSync(__dirname +'/versions.json', JSON.stringify(this.#versions));
 
+                this.emit('update', list);
+
             }
+
+            return list;
 
         });
 
