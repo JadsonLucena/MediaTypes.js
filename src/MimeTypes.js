@@ -2,19 +2,19 @@ const fs = require('fs');
 const { parse } = require('path');
 const EventEmitter = require('events');
 
-// https://www.rfc-editor.org/rfc/rfc6838#section-4.2
-/*
-https://github.com/jshttp/media-typer/blob/master/index.js
-const SUBTYPE_NAME_REGEXP = new Regex('^[a-z0-9][a-z0-9!#$&^_.-]{0,126}$', 'i')
-const TYPE_NAME_REGEXP = new Regex('^[a-z0-9][a-z0-9!#$&^_-]{0,126}$', 'i')
-const TYPE_REGEXP = new Regex('^\s*([a-z0-9][a-z0-9!#$&^_-]{0,126})\/([a-z0-9][a-z0-9!#$&^_.+-]{0,126})\s*$', 'i')
-*/
 class MimeTypes extends EventEmitter {
 
     #mimeTypes;
     #versions;
     #updateInterval;
     #updateLoop;
+
+    // https://www.rfc-editor.org/rfc/rfc4288#section-4.2
+    // https://www.rfc-editor.org/rfc/rfc6838#section-4.2
+    // https://www.rfc-editor.org/rfc/rfc2045#section-5.1
+    // https://www.rfc-editor.org/rfc/rfc2231#section-7
+    // https://www.rfc-editor.org/rfc/rfc5987#section-3.2.1
+    #pattern = new RegExp(`^(?<type>(?:x-)?[a-z0-9]{1,64})\\/(?<subtype>(?:(?<facet>[a-z0-9!#$&\\-^_]+)(?:(?<=\/x)-|\\.))?(?:[a-z0-9!#$&\\-^_]+\\+(?<suffix>[a-z0-9!#$&\\-^_]+)|[a-z0-9!#$&\\-^_]+[.+][a-z0-9!#$&\\-^_]+|[a-z0-9!#$&\\-^_+]+)+){1,64}$`, 'i');
 
     constructor(updateInterval = 86400000) {
 
@@ -128,7 +128,7 @@ class MimeTypes extends EventEmitter {
                        let mimeType = line[0].trim().toLowerCase();
                        let extensions = line[1].split(/\s+/).map(ext => ext.trim().toLowerCase()).filter(ext => ext);
 
-                        if (mimeType != '' && extensions.length) {
+                        if (this.pattern.test(mimeType)) {
 
                             curr[mimeType] = extensions;
 
@@ -170,7 +170,7 @@ class MimeTypes extends EventEmitter {
                     let mimeType = line.groups.mimeType.trim().toLowerCase();
                     let extensions = line.groups.extensions.split(/\s+/).map(ext => ext.trim().toLowerCase()).filter(ext => ext);
 
-                    if (mimeType != '' && extensions.length) {
+                    if (this.pattern.test(mimeType)) {
 
                         curr[mimeType] = extensions;
 
@@ -420,6 +420,7 @@ class MimeTypes extends EventEmitter {
 
     get list() { return this.#mimeTypes; }
     get updateInterval() { return this.#updateInterval; }
+    get pattern() { return this.#pattern; }
 
 
     set updateInterval(updateInterval = 86400000) {
@@ -481,11 +482,11 @@ class MimeTypes extends EventEmitter {
 
         extension = [].concat(extension);
 
-        if (typeof mimeType != 'string' || !mimeType.trim() || !/^.+\/.+$/i.test(mimeType)) {
+        if (typeof mimeType != 'string' || !mimeType.trim() || !this.pattern.test(mimeType)) {
 
             throw new TypeError('Unsupported mimeType');
 
-        } else if (!extension.every(extension => typeof extension == 'string' && extension.trim() && /^[a-z0-9-_+.~%]+$/i.test(extension))) {
+        } else if (!extension.every(extension => typeof extension == 'string' && extension.trim() && /^[a-z0-9!#$&\\-^_+]+$/i.test(extension))) {
 
             throw new TypeError('Unsupported extension');
 
