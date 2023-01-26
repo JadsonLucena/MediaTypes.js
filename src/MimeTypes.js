@@ -43,17 +43,6 @@ class MimeTypes extends EventEmitter {
             this.#versions = {
                 apache: null,
                 debian:  null,
-                iana: {
-                    application: null,
-                    audio: null,
-                    font: null,
-                    image: null,
-                    message: null,
-                    model: null,
-                    multipart: null,
-                    text: null,
-                    video: null
-                },
                 nginx: null
             };
 
@@ -191,52 +180,6 @@ class MimeTypes extends EventEmitter {
 
     }
 
-    #loadIANA = async res => {
-
-        try {
-
-            return {
-                version: res.headers.get('last-modified'),
-                content: (await res.text()).split(/\n+/).slice(1).filter(line => !/^#.*/.test(line) && line.trim() != '').reduce((curr, line) => {
-
-                    line = line.split(',');
-
-                    if (line.length > 1) {
-
-                        let extension = line[0].trim().toLowerCase();
-                        let mimeType = line[1].trim().toLowerCase();
-
-                        if (mimeType != '' && extension != '' && !/^.*(obsoleted?|deprecated?).*$/i.test(extension)) {
-
-                            if (!(mimeType in curr)) {
-
-                                curr[mimeType] = [ extension ];
-
-                            } else if (!curr[mimeType].includes(extension)) {
-
-                                curr[mimeType].push(extension);
-
-                            }
-
-                        }
-
-                    }
-
-                    return curr;
-
-                }, {})
-            };
-
-        } catch (err) {
-
-            console.error(err);
-
-            return null;
-
-        }
-
-    }
-
     update = () => {
 
         return Promise.allSettled([
@@ -294,38 +237,7 @@ class MimeTypes extends EventEmitter {
                 }
 
             })
-        ].concat([ // https://www.iana.org/assignments/media-types/media-types.xhtml
-            'https://www.iana.org/assignments/media-types/application.csv',
-            'https://www.iana.org/assignments/media-types/audio.csv',
-            'https://www.iana.org/assignments/media-types/font.csv',
-            'https://www.iana.org/assignments/media-types/image.csv',
-            'https://www.iana.org/assignments/media-types/message.csv',
-            'https://www.iana.org/assignments/media-types/model.csv',
-            'https://www.iana.org/assignments/media-types/multipart.csv',
-            'https://www.iana.org/assignments/media-types/text.csv',
-            'https://www.iana.org/assignments/media-types/video.csv'
-        ].map(url => fetch(url, {
-            method: 'HEAD',
-            headers: {
-                'Accept-Encoding': 'identity',
-                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36'
-            }
-        }).then(res => {
-
-            let type = url.split('/').pop().replace('.csv', '');
-
-            if (res.status == 200 && res.headers.get('last-modified') != this.#versions.iana?.[type]) {
-
-                return fetch(url, {
-                    headers: {
-                        'Accept-Encoding': 'identity',
-                        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36'
-                    }
-                });
-
-            }
-
-        })))).then(async results => {
+        ]).then(async results => {
 
             let list = {};
 
@@ -379,28 +291,6 @@ class MimeTypes extends EventEmitter {
                 }
 
             }
-
-            for (let res of results.slice(3)) {
-
-                if (res.status == 'fulfilled' && res.value) {
-
-                    let load = await this.#loadIANA(res.value);
-
-                    if (load) {
-
-                        this.#versions.iana[res.value.url.split('/').pop().replace('.csv', '')] = load.version;
-
-                        list.iana = {
-                            content: this.#updateList(load.content),
-                            version: load.version
-                        };
-
-                    }
-
-                }
-
-            }
-
 
             if (Object.keys(list).length) {
 
