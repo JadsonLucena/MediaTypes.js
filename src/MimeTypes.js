@@ -14,7 +14,8 @@ class MimeTypes extends EventEmitter {
     // https://www.rfc-editor.org/rfc/rfc2045#section-5.1
     // https://www.rfc-editor.org/rfc/rfc2231#section-7
     // https://www.rfc-editor.org/rfc/rfc5987#section-3.2.1
-    #pattern = new RegExp(`^(?<type>(?:x-)?[a-z0-9]{1,64})\\/(?<subtype>(?:(?<facet>[a-z0-9!#$&\\-^_]+)(?:(?<=\/x)-|\\.))?(?:[a-z0-9!#$&\\-^_]+\\+(?<suffix>[a-z0-9!#$&\\-^_]+)|[a-z0-9!#$&\\-^_]+[.+][a-z0-9!#$&\\-^_]+|[a-z0-9!#$&\\-^_+]+)+){1,64}$`, 'i');
+    #formatMediaType = new RegExp(`^(?<type>(?:x-)?[a-z0-9]{1,64})\\/(?<subtype>(?:(?<facet>[a-z0-9!#$&\\-^_]+)(?:(?<=\/x)-|\\.))?(?:[a-z0-9!#$&\\-^_]+\\+(?<suffix>[a-z0-9!#$&\\-^_]+)|[a-z0-9!#$&\\-^_]+[.+][a-z0-9!#$&\\-^_]+|[a-z0-9!#$&\\-^_+]+)+){1,64}$`, 'i');
+    #formatExtension = new RegExp(`^[a-z0-9!#$&\\-^_+]+$`, 'i');
 
     constructor(updateInterval = 86400000) {
 
@@ -68,21 +69,21 @@ class MimeTypes extends EventEmitter {
 
         let list = {};
 
-        for (let mimeType in content) {
+        for (let extension in content) {
 
-            mimeType = mimeType.trim().toLowerCase();
+            extension = extension.trim().toLowerCase();
 
-            if (mimeType in this.#mimeTypes) {
+            if (extension in this.#mimeTypes) {
 
-                content[mimeType].forEach(extension => {
+                content[extension].forEach(mimeType => {
 
-                    extension = extension.trim().toLowerCase();
+                    mimeType = mimeType.trim().toLowerCase();
 
-                    if (!this.#mimeTypes[mimeType].includes(extension)) {
+                    if (!this.#mimeTypes[extension].includes(mimeType)) {
 
-                        this.#mimeTypes[mimeType].push(extension);
+                        this.#mimeTypes[extension].push(mimeType);
 
-                        list[mimeType] = (list[mimeType] || []).concat(extension);
+                        list[extension] = (list[extension] || []).concat(mimeType);
 
                     }
 
@@ -90,9 +91,7 @@ class MimeTypes extends EventEmitter {
 
             } else {
 
-                this.#mimeTypes[mimeType] = content[mimeType].map(extension => extension.trim().toLowerCase());
-
-                list[mimeType] = this.#mimeTypes[mimeType];
+                list[extension] = this.#mimeTypes[extension] = content[extension];
 
             }
 
@@ -115,11 +114,20 @@ class MimeTypes extends EventEmitter {
                     if (line.length > 1) {
 
                        let mimeType = line[0].trim().toLowerCase();
-                       let extensions = line[1].split(/\s+/).map(ext => ext.trim().toLowerCase()).filter(ext => ext);
 
-                        if (this.pattern.test(mimeType)) {
+                        if (this.#formatMediaType.test(mimeType)) {
 
-                            curr[mimeType] = extensions;
+                            line[1].split(/\s+/).forEach(extension => {
+
+                                extension = extension.trim().toLowerCase()
+
+                                if (this.#formatExtension.test(extension)) {
+
+                                    curr[extension] = (curr[extension] || []).concat(mimeType);
+
+                                }
+
+                            });
 
                         }
 
@@ -157,11 +165,20 @@ class MimeTypes extends EventEmitter {
                     line = line.match(/^\s*(?<mimeType>[^\s]+)\s+(?<extensions>.*)\s*$/);
 
                     let mimeType = line.groups.mimeType.trim().toLowerCase();
-                    let extensions = line.groups.extensions.split(/\s+/).map(ext => ext.trim().toLowerCase()).filter(ext => ext);
 
-                    if (this.pattern.test(mimeType)) {
+                    if (this.#formatMediaType.test(mimeType)) {
 
-                        curr[mimeType] = extensions;
+                        line.groups.extensions.split(/\s+/).forEach(extension => {
+
+                            extension = extension.trim().toLowerCase()
+
+                            if (this.#formatExtension.test(extension)) {
+
+                                curr[extension] = (curr[extension] || []).concat(mimeType);
+
+                            }
+
+                        })
 
                     }
 
@@ -310,7 +327,7 @@ class MimeTypes extends EventEmitter {
 
     get list() { return this.#mimeTypes; }
     get updateInterval() { return this.#updateInterval; }
-    get pattern() { return this.#pattern; }
+    get pattern() { return this.#formatMediaType; }
 
 
     set updateInterval(updateInterval = 86400000) {
@@ -352,40 +369,51 @@ class MimeTypes extends EventEmitter {
 
         let pathinfo = parse(path);
         let extension = pathinfo.ext.replace('.', '').trim().toLowerCase();
-        let mimeTypes = [];
 
-        for (let mimeType in this.#mimeTypes) {
-
-            if (!mimeTypes.includes(mimeType) && this.#mimeTypes[mimeType].includes(extension)) {
-
-                mimeTypes.push(mimeType);
-
-            }
-
-        }
-
-        return mimeTypes;
-
-    }
-
-    append(mimeType, extension) {
-
-        extension = [].concat(extension);
-
-        if (typeof mimeType != 'string' || !mimeType.trim() || !this.pattern.test(mimeType)) {
-
-            throw new TypeError('Unsupported mimeType');
-
-        } else if (!extension.every(extension => typeof extension == 'string' && extension.trim() && /^[a-z0-9!#$&\\-^_+]+$/i.test(extension))) {
+        if (typeof extension != 'string') {
 
             throw new TypeError('Unsupported extension');
 
+        } else if (!this.#formatExtension.test(extension)) {
+
+            throw new SyntaxError('Unsupported extension');
+
         }
 
+        return this.#mimeTypes[extension];
+
+    }
+
+    append(extension, mimeType) {
+
+        mimeType = [].concat(mimeType);
+
+        if (typeof extension != 'string') {
+
+            throw new TypeError('Unsupported extension');
+
+        } else if (!this.#formatExtension.test(extension)) {
+
+            throw new SyntaxError('Unsupported extension');
+
+        }
+
+        mimeType.forEach(mimeType => {
+
+            if (typeof mimeType != 'string') {
+
+                throw new TypeError(`Unsupported mimeType: ${mimeType}`);
+
+            } else if (!this.#formatMediaType.test(mimeType)) {
+
+                throw new SyntaxError(`Unsupported mimeType: ${mimeType}`);
+
+            }
+
+        });
 
         let content = {};
-        content[mimeType] = extension;
-
+        content[extension] = mimeType;
 
         if (this.#updateList(content)) {
 

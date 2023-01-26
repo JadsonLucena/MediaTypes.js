@@ -30,8 +30,8 @@ updateInterval(
 ```typescript
 // Methods
 append(
-    mimeType: string, // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type
-    extension: string | string[] // new RegExp('^[a-z0-9-_+.~%]+$', 'i');
+    extension: string
+    mimeType: string | string[], // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type
 )
 
 get(

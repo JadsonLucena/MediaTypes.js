@@ -7,8 +7,7 @@
       "node": ">=18"
     },
     "scripts": {
-      "ci": "exit 0",
-      "test": "exit 0"
+      "test": "jest './test'"
     },
     "files": [
       "src/",
