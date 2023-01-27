@@ -2,9 +2,9 @@ const fs = require('fs');
 const { parse } = require('path');
 const EventEmitter = require('events');
 
-class MimeTypes extends EventEmitter {
+class MediaTypes extends EventEmitter {
 
-    #mimeTypes;
+    #mediaTypes;
     #versions;
     #updateInterval;
     #updateLoop;
@@ -26,11 +26,11 @@ class MimeTypes extends EventEmitter {
 
         try {
 
-            this.#mimeTypes = JSON.parse(fs.readFileSync(__dirname +'/mimetypes.json').toString('utf8'));
+            this.#mediaTypes = JSON.parse(fs.readFileSync(__dirname +'/mimetypes.json').toString('utf8'));
 
         } catch (err) {
 
-            this.#mimeTypes = {};
+            this.#mediaTypes = {};
 
         }
 
@@ -73,17 +73,17 @@ class MimeTypes extends EventEmitter {
 
             extension = extension.trim().toLowerCase();
 
-            if (extension in this.#mimeTypes) {
+            if (extension in this.#mediaTypes) {
 
-                content[extension].forEach(mimeType => {
+                content[extension].forEach(mediaType => {
 
-                    mimeType = mimeType.trim().toLowerCase();
+                    mediaType = mediaType.trim().toLowerCase();
 
-                    if (!this.#mimeTypes[extension].includes(mimeType)) {
+                    if (!this.#mediaTypes[extension].includes(mediaType)) {
 
-                        this.#mimeTypes[extension].push(mimeType);
+                        this.#mediaTypes[extension].push(mediaType);
 
-                        list[extension] = (list[extension] || []).concat(mimeType);
+                        list[extension] = (list[extension] || []).concat(mediaType);
 
                     }
 
@@ -91,7 +91,7 @@ class MimeTypes extends EventEmitter {
 
             } else {
 
-                list[extension] = this.#mimeTypes[extension] = content[extension];
+                list[extension] = this.#mediaTypes[extension] = content[extension];
 
             }
 
@@ -113,9 +113,9 @@ class MimeTypes extends EventEmitter {
 
                     if (line.length > 1) {
 
-                       let mimeType = line[0].trim().toLowerCase();
+                       let mediaType = line[0].trim().toLowerCase();
 
-                        if (this.#formatMediaType.test(mimeType)) {
+                        if (this.#formatMediaType.test(mediaType)) {
 
                             line[1].split(/\s+/).forEach(extension => {
 
@@ -123,7 +123,7 @@ class MimeTypes extends EventEmitter {
 
                                 if (this.#formatExtension.test(extension)) {
 
-                                    curr[extension] = (curr[extension] || []).concat(mimeType);
+                                    curr[extension] = (curr[extension] || []).concat(mediaType);
 
                                 }
 
@@ -162,11 +162,11 @@ class MimeTypes extends EventEmitter {
                 version: res.headers.get('etag'),
                 content: (await res.text()).replace(/(\s*types\s*{\s*|\s*}\s*)/ig, '').split(';').filter(line => !/^#.*/.test(line) && line.trim() != '').reduce((curr, line) => {
 
-                    line = line.match(/^\s*(?<mimeType>[^\s]+)\s+(?<extensions>.*)\s*$/);
+                    line = line.match(/^\s*(?<mediaType>[^\s]+)\s+(?<extensions>.*)\s*$/);
 
-                    let mimeType = line.groups.mimeType.trim().toLowerCase();
+                    let mediaType = line.groups.mediaType.trim().toLowerCase();
 
-                    if (this.#formatMediaType.test(mimeType)) {
+                    if (this.#formatMediaType.test(mediaType)) {
 
                         line.groups.extensions.split(/\s+/).forEach(extension => {
 
@@ -174,7 +174,7 @@ class MimeTypes extends EventEmitter {
 
                             if (this.#formatExtension.test(extension)) {
 
-                                curr[extension] = (curr[extension] || []).concat(mimeType);
+                                curr[extension] = (curr[extension] || []).concat(mediaType);
 
                             }
 
@@ -311,7 +311,7 @@ class MimeTypes extends EventEmitter {
 
             if (Object.keys(list).length) {
 
-                fs.writeFileSync(__dirname +'/mimetypes.json', JSON.stringify(this.#mimeTypes));
+                fs.writeFileSync(__dirname +'/mimetypes.json', JSON.stringify(this.#mediaTypes));
                 fs.writeFileSync(__dirname +'/versions.json', JSON.stringify(this.#versions));
 
                 this.emit('update', list);
@@ -325,7 +325,7 @@ class MimeTypes extends EventEmitter {
     }
 
 
-    get list() { return this.#mimeTypes; }
+    get list() { return this.#mediaTypes; }
     get updateInterval() { return this.#updateInterval; }
     get pattern() { return this.#formatMediaType; }
 
@@ -380,13 +380,13 @@ class MimeTypes extends EventEmitter {
 
         }
 
-        return this.#mimeTypes[extension];
+        return this.#mediaTypes[extension];
 
     }
 
-    append(extension, mimeType) {
+    append(extension, mediaType) {
 
-        mimeType = [].concat(mimeType);
+        mediaType = [].concat(mediaType);
 
         if (typeof extension != 'string') {
 
@@ -398,26 +398,26 @@ class MimeTypes extends EventEmitter {
 
         }
 
-        mimeType.forEach(mimeType => {
+        mediaType.forEach(mediaType => {
 
-            if (typeof mimeType != 'string') {
+            if (typeof mediaType != 'string') {
 
-                throw new TypeError(`Unsupported mimeType: ${mimeType}`);
+                throw new TypeError(`Unsupported mediaType: ${mediaType}`);
 
-            } else if (!this.#formatMediaType.test(mimeType)) {
+            } else if (!this.#formatMediaType.test(mediaType)) {
 
-                throw new SyntaxError(`Unsupported mimeType: ${mimeType}`);
+                throw new SyntaxError(`Unsupported mediaType: ${mediaType}`);
 
             }
 
         });
 
         let content = {};
-        content[extension] = mimeType;
+        content[extension] = mediaType;
 
         if (this.#updateList(content)) {
 
-            fs.writeFileSync(__dirname +'/mimetypes.json', JSON.stringify(this.#mimeTypes));
+            fs.writeFileSync(__dirname +'/mimetypes.json', JSON.stringify(this.#mediaTypes));
 
         }
 
@@ -426,4 +426,4 @@ class MimeTypes extends EventEmitter {
 }
 
 
-module.exports = MimeTypes;
+module.exports = MediaTypes;

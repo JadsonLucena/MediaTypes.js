@@ -1,8 +1,8 @@
 {
-    "name": "@jadsonlucena/mimetypes",
+    "name": "@jadsonlucena/mediatypes",
     "version": "0.1.0",
-    "description": "This is a comprehensive compilation of mime types that is periodically updated through the following projects: Apache, NGINX, IANA and Debian",
-    "main": "./src/MymeTypes.js",
+    "description": "This is a comprehensive compilation of media types that is periodically updated through the following projects: Apache, NGINX, IANA and Debian",
+    "main": "./src/MediaTypes.js",
     "engines": {
       "node": ">=18"
     },
@@ -16,11 +16,11 @@
     ],
     "repository": {
       "type": "git",
-      "url": "git+https://github.com/JadsonLucena/MimeTypes.js.git"
+      "url": "git+https://github.com/JadsonLucena/MediaTypes.js.git"
     },
     "keywords": [
       "MIME types",
-      "mimetypes",
+      "mediatypes",
       "mime.types",
       "mime types",
       "media types",
@@ -30,7 +30,7 @@
     "author": "JadsonLucena <jadsonlucena@gmail.com> (https://github.com/JadsonLucena)",
     "license": "MIT",
     "bugs": {
-      "url": "https://github.com/JadsonLucena/MimeTypes.js/issues"
+      "url": "https://github.com/JadsonLucena/MediaTypes.js/issues"
     },
-    "homepage": "https://github.com/JadsonLucena/MimeTypes.js#readme"
+    "homepage": "https://github.com/JadsonLucena/MediaTypes.js#readme"
   }

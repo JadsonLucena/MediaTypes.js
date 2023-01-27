@@ -1,9 +1,9 @@
-# MimeTypes
-This is a comprehensive compilation of MIME types that is periodically updated through the following projects: [Apache](https://github.com/apache/httpd/blob/trunk/docs/conf/mime.types), [NGINX](https://github.com/nginx/nginx/blob/master/conf/mime.types), [IANA](https://www.iana.org/assignments/media-types/media-types.xhtml) and [Debian](https://salsa.debian.org/debian/media-types/-/blob/master/mime.types)
+# MediaTypes
+This is a comprehensive compilation of media types that is periodically updated through the following projects: [Apache](https://github.com/apache/httpd/blob/trunk/docs/conf/mime.types), [NGINX](https://github.com/nginx/nginx/blob/master/conf/mime.types), [IANA](https://www.iana.org/assignments/media-types/media-types.xhtml) and [Debian](https://salsa.debian.org/debian/media-types/-/blob/master/mime.types)
 
 
 ## What is
-A file's extension has no meaning on the web. In order for the client to interpret the document correctly, the MIME type must be sent in the Content-Type header.
+A file's extension has no meaning on the web. In order for the client to interpret the document correctly, the media type must be sent in the Content-Type header.
 
 
 ## Interfaces
@@ -16,7 +16,7 @@ constructor(
 
 ```typescript
 // Getters
-list(): { [mimeType: string]: string[] } // List of all MIME types with their extensions
+list(): { [mediaType: string]: string[] } // List of all media types with their extensions
 updateInterval(): number
 ```
 
@@ -31,12 +31,12 @@ updateInterval(
 // Methods
 append(
     extension: string
-    mimeType: string | string[], // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type
+    mediaType: string | string[], // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type
 )
 
 get(
     path: string // https://nodejs.org/api/path.html#pathparsepath
-): string[] // MIME type list
+): string[] // media type list
 
 update(): void // database update
 ```
@@ -48,4 +48,4 @@ on(name: 'update', callback: (mimeType: string, extensions: string[]) => void): 
 
 
 ## QuickStart
-[![Edit MimeType.mjs](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/async-cache-6m2we0?autoresize=1&expanddevtools=1&fontsize=14&hidenavigation=1&theme=dark)
+[![Edit MediaType.mjs](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/async-cache-6m2we0?autoresize=1&expanddevtools=1&fontsize=14&hidenavigation=1&theme=dark)
