@@ -26,21 +26,14 @@ class MediaTypes extends EventEmitter {
 
         try {
 
-            this.#mediaTypes = JSON.parse(fs.readFileSync(__dirname +'/mimetypes.json').toString('utf8'));
+            const { mediaTypes, versions } = JSON.parse(fs.readFileSync(__dirname +'/DB.json').toString('utf8'));
+
+            this.#mediaTypes = mediaTypes
+            this.#versions = versions
 
         } catch (err) {
 
             this.#mediaTypes = {};
-
-        }
-
-
-        try {
-
-            this.#versions = JSON.parse(fs.readFileSync(__dirname +'/versions.json').toString('utf8'));
-
-        } catch (err) {
-
             this.#versions = {
                 apache: null,
                 debian:  null,
@@ -48,17 +41,6 @@ class MediaTypes extends EventEmitter {
             };
 
         }
-
-
-        /*try {
-
-            this.update();
-
-        } catch (err) {
-
-            console.error(err);
-
-        }*/
 
 
         this.updateInterval = updateInterval;
@@ -81,7 +63,7 @@ class MediaTypes extends EventEmitter {
 
                     if (!this.#mediaTypes[extension].includes(mediaType)) {
 
-                        this.#mediaTypes[extension].push(mediaType);
+                        this.#mediaTypes[extension] = this.#mediaTypes[extension].concat(mediaType).sort();
 
                         list[extension] = (list[extension] || []).concat(mediaType);
 
@@ -311,8 +293,10 @@ class MediaTypes extends EventEmitter {
 
             if (Object.keys(list).length) {
 
-                fs.writeFileSync(__dirname +'/mimetypes.json', JSON.stringify(this.#mediaTypes));
-                fs.writeFileSync(__dirname +'/versions.json', JSON.stringify(this.#versions));
+                fs.writeFileSync(__dirname +'/DB.json', JSON.stringify({
+                    mediaTypes: this.#mediaTypes,
+                    versions: this.#versions
+                }));
 
                 this.emit('update', list);
 
@@ -417,7 +401,10 @@ class MediaTypes extends EventEmitter {
 
         if (this.#updateList(content)) {
 
-            fs.writeFileSync(__dirname +'/mimetypes.json', JSON.stringify(this.#mediaTypes));
+            fs.writeFileSync(__dirname +'/DB.json', JSON.stringify({
+                mediaTypes: this.#mediaTypes,
+                versions: this.#versions
+            }));
 
         }
 
