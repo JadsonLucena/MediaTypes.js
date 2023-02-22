@@ -1,8 +1,10 @@
 const fs = require('fs');
 const { parse } = require('path');
-const EventEmitter = require('events');
+const { EventEmitter } = require('events');
 
-class MediaTypes extends EventEmitter {
+class MediaTypes {
+
+    #eventEmitter;
 
     #mediaTypes;
     #versions;
@@ -19,10 +21,7 @@ class MediaTypes extends EventEmitter {
 
     constructor(updateInterval = 86400000) {
 
-        super({captureRejections: true});
-
-        this.setMaxListeners(0);
-
+        this.#eventEmitter = new EventEmitter();
 
         try {
 
@@ -47,7 +46,7 @@ class MediaTypes extends EventEmitter {
 
     }
 
-    #updateList(content) {
+    #updateList = content => {
 
         let list = {};
 
@@ -298,7 +297,7 @@ class MediaTypes extends EventEmitter {
                     versions: this.#versions
                 }));
 
-                this.emit('update', list);
+                this.#eventEmitter.emit('update', list);
 
             }
 
@@ -349,7 +348,7 @@ class MediaTypes extends EventEmitter {
     }
 
 
-    get(path) {
+    get = path => {
 
         let pathinfo = parse(path);
         let extension = pathinfo.ext.replace('.', '').trim().toLowerCase();
@@ -368,7 +367,7 @@ class MediaTypes extends EventEmitter {
 
     }
 
-    append(extension, mediaType) {
+    append = (extension, mediaType) => {
 
         mediaType = [].concat(mediaType);
 
@@ -410,7 +409,22 @@ class MediaTypes extends EventEmitter {
 
     }
 
-}
+    // EventEmitter methods
+    addListener = (...params) => this.#eventEmitter.addListener(...params);
+    eventNames = (...params) => this.#eventEmitter.eventNames(...params);
+    getMaxListeners = (...params) => this.#eventEmitter.getMaxListeners(...params);
+    listenerCount = (...params) => this.#eventEmitter.listenerCount(...params);
+    listeners = (...params) => this.#eventEmitter.listeners(...params);
+    off = (...params) => this.#eventEmitter.off(...params);
+    on = (...params) => this.#eventEmitter.on(...params);
+    once = (...params) => this.#eventEmitter.once(...params);
+    prependListener = (...params) => this.#eventEmitter.prependListener(...params);
+    prependOnceListener = (...params) => this.#eventEmitter.prependOnceListener(...params);
+    removeAllListeners = (...params) => this.#eventEmitter.removeAllListeners(...params);
+    removeListener = (...params) => this.#eventEmitter.removeListener(...params);
+    setMaxListeners = (...params) => this.#eventEmitter.setMaxListeners(...params);
+    rawListeners = (...params) => this.#eventEmitter.rawListeners(...params);
 
+}
 
 module.exports = MediaTypes;
