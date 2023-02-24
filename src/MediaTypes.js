@@ -367,7 +367,7 @@ class MediaTypes {
 
     }
 
-    append = (extension, mediaType) => {
+    set = (extension, mediaType) => {
 
         mediaType = [].concat(mediaType);
 
