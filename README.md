@@ -1,5 +1,5 @@
 # MediaTypes
-This is a comprehensive compilation of media types that is periodically updated through the following projects: [Apache](https://github.com/apache/httpd/blob/trunk/docs/conf/mime.types), [NGINX](https://github.com/nginx/nginx/blob/master/conf/mime.types), [IANA](https://www.iana.org/assignments/media-types/media-types.xhtml) and [Debian](https://salsa.debian.org/debian/media-types/-/blob/master/mime.types)
+This is a comprehensive compilation of media types that is periodically updated through the following projects: [Apache](https://github.com/apache/httpd/blob/trunk/docs/conf/mime.types), [NGINX](https://github.com/nginx/nginx/blob/master/conf/mime.types) and [Debian](https://salsa.debian.org/debian/media-types/-/blob/master/mime.types)
 
 
 ## What is
@@ -16,7 +16,7 @@ constructor(
 
 ```typescript
 // Getters
-list(): { [mediaType: string]: string[] } // List of all media types with their extensions
+list(): { [extension: string]: string[] } // List of all extensions with their media types
 updateInterval(): number
 ```
 
@@ -29,21 +29,26 @@ updateInterval(
 
 ```typescript
 // Methods
-append(
+delete(
     extension: string
     mediaType: string | string[], // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type
-)
+) string[] // Deleted media type list
 
 get(
     path: string // https://nodejs.org/api/path.html#pathparsepath
-): string[] // media type list
+): string[] // Media type list
 
-update(): void // database update
+set(
+    extension: string
+    mediaType: string | string[], // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type
+) string[] // Inserted media type list
+
+update(): { [extension: string]: string[] } // List of new types of media inserted
 ```
 
 ```typescript
 // Listeners
-on(name: 'update', callback: (mimeType: string, extensions: string[]) => void): void
+on(name: 'update', callback: (list: { [extension: string]: string[] }) => void): void
 ```
 
 
