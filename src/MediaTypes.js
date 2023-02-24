@@ -398,14 +398,20 @@ class MediaTypes {
         let content = {};
         content[extension] = mediaType;
 
-        if (this.#updateList(content)) {
+        const list = this.#updateList(content);
 
-            fs.writeFileSync(__dirname +'/DB.json', JSON.stringify({
-                mediaTypes: this.#mediaTypes,
-                versions: this.#versions
-            }));
+        if (!(extension in list)) {
+
+            return [];
 
         }
+
+        fs.writeFileSync(__dirname +'/DB.json', JSON.stringify({
+            mediaTypes: this.#mediaTypes,
+            versions: this.#versions
+        }));
+
+        return list[extension];
 
     }
 
