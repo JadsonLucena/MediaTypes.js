@@ -409,6 +409,75 @@ class MediaTypes {
 
     }
 
+    delete = (extension, mediaType) => {
+
+        mediaType = [].concat(mediaType);
+
+        if (typeof extension != 'string') {
+
+            throw new TypeError('Unsupported extension');
+
+        } else if (!this.#formatExtension.test(extension)) {
+
+            throw new SyntaxError('Unsupported extension');
+
+        }
+
+        extension = extension.trim().toLowerCase();
+
+        mediaType.forEach(mediaType => {
+
+            if (typeof mediaType != 'string') {
+
+                throw new TypeError(`Unsupported mediaType: ${mediaType}`);
+
+            } else if (!this.#formatMediaType.test(mediaType)) {
+
+                throw new SyntaxError(`Unsupported mediaType: ${mediaType}`);
+
+            }
+
+        });
+
+        let list = [];
+
+        if (!(extension in this.#mediaTypes)) {
+
+            return list;
+
+        }
+
+        mediaType.forEach(mediaType => {
+
+            let i = this.#mediaTypes[extension].indexOf(mediaType.trim().toLowerCase());
+
+            if (i >= 0) {
+
+                list = list.concat(this.#mediaTypes[extension].splice(i, 1));
+
+            }
+
+        });
+
+        if (!this.#mediaTypes[extension].length) {
+
+            delete this.#mediaTypes[extension];
+
+        }
+
+        if (list.length) {
+
+            fs.writeFileSync(__dirname +'/DB.json', JSON.stringify({
+                mediaTypes: this.#mediaTypes,
+                versions: this.#versions
+            }));
+
+        }
+
+        return list;
+
+    }
+
     // EventEmitter methods
     addListener = (...params) => this.#eventEmitter.addListener(...params);
     eventNames = (...params) => this.#eventEmitter.eventNames(...params);
