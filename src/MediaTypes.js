@@ -178,7 +178,7 @@ class MediaTypes {
 
     }
 
-    update = () => {
+    update = (force = false) => {
 
         return Promise.allSettled([
             fetch('https://raw.githubusercontent.com/apache/httpd/trunk/docs/conf/mime.types', { // https://github.com/apache/httpd/blob/trunk/docs/conf/mime.types
@@ -188,7 +188,7 @@ class MediaTypes {
                 }
             }).then(res => {
 
-                if (res.status == 200 && res.headers.get('etag') != this.#versions.apache) {
+                if (res.status == 200 && (Boolean(force) || res.headers.get('etag') != this.#versions.apache)) {
 
                     return fetch('https://raw.githubusercontent.com/apache/httpd/trunk/docs/conf/mime.types', {
                         headers: {
@@ -206,7 +206,7 @@ class MediaTypes {
                 }
             }).then(res => {
 
-                if (res.status == 200 && res.headers.get('etag') != this.#versions.debian) {
+                if (res.status == 200 && (Boolean(force) || res.headers.get('etag') != this.#versions.debian)) {
 
                     return fetch('https://salsa.debian.org/debian/media-types/-/raw/master/mime.types', {
                         headers: {
@@ -224,7 +224,7 @@ class MediaTypes {
                 }
             }).then(res => {
 
-                if (res.status == 200 && res.headers.get('etag') != this.#versions.nginx) {
+                if (res.status == 200 && (Boolean(force) || res.headers.get('etag') != this.#versions.nginx)) {
 
                     return fetch('https://raw.githubusercontent.com/nginx/nginx/master/conf/mime.types', {
                         headers: {
