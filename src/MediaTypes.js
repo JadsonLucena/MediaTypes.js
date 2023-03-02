@@ -311,6 +311,7 @@ class MediaTypes {
     get list() { return this.#mediaTypes; }
     get updateInterval() { return this.#updateInterval; }
     get pattern() { return this.#formatMediaType; }
+    get versions() { return this.#versions; }
 
 
     set updateInterval(updateInterval = 86400000) {
