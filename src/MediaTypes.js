@@ -361,40 +361,34 @@ class MediaTypes {
 
     set = (extension, mediaType) => {
 
-        mediaType = [].concat(mediaType);
-
         if (typeof extension != 'string') {
 
-            throw new TypeError('Unsupported extension');
+            throw new TypeError('Invalid extension');
 
         } else if (!this.#formatExtension.test(extension)) {
 
-            throw new SyntaxError('Unsupported extension');
+            throw new SyntaxError('Invalid extension');
 
         }
 
-        mediaType.forEach(mediaType => {
+        if (typeof mediaType != 'string') {
 
-            if (typeof mediaType != 'string') {
+            throw new TypeError('Invalid mediaType');
 
-                throw new TypeError(`Unsupported mediaType: ${mediaType}`);
+        } else if (!this.#formatMediaType.test(mediaType)) {
 
-            } else if (!this.#formatMediaType.test(mediaType)) {
+            throw new SyntaxError('Invalid mediaType');
 
-                throw new SyntaxError(`Unsupported mediaType: ${mediaType}`);
-
-            }
-
-        });
+        }
 
         let content = {};
-        content[extension] = mediaType;
+        content[extension] = [].concat(mediaType);
 
         const list = this.#updateList(content);
 
         if (!(extension in list)) {
 
-            return [];
+            return false;
 
         }
 
@@ -403,7 +397,7 @@ class MediaTypes {
             versions: this.#versions
         }));
 
-        return list[extension];
+        return true;
 
     }
 
