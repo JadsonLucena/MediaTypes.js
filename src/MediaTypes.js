@@ -1,6 +1,6 @@
-const fs = require('fs');
-const { parse } = require('path');
-const { EventEmitter } = require('events');
+const fs = require('node:fs');
+const { parse } = require('node:path');
+const { EventEmitter } = require('node:events');
 
 class MediaTypes {
 
