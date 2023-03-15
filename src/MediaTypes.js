@@ -340,20 +340,22 @@ class MediaTypes {
 
     get = path => {
 
-        let pathinfo = parse(path);
-        let extension = pathinfo.ext.replace('.', '').trim().toLowerCase();
+        if (typeof path != 'string') {
 
-        if (typeof extension != 'string') {
-
-            throw new TypeError('Unsupported extension');
-
-        } else if (!this.#formatExtension.test(extension)) {
-
-            throw new SyntaxError('Unsupported extension');
+            throw new TypeError('Invalid path');
 
         }
 
-        return this.#mediaTypes[extension];
+        let pathinfo = parse(path);
+        let extension = pathinfo.ext.replace('.', '').trim().toLowerCase();
+            
+        if (!this.#formatExtension.test(extension)) {
+
+            throw new SyntaxError('Invalid extension');
+
+        }
+
+        return this.#mediaTypes[extension] || [];
 
     }
 
