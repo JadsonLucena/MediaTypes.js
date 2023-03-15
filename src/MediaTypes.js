@@ -84,48 +84,34 @@ class MediaTypes {
 
     #loadApache = async res => {
 
-        try {
+        return {
+            version: res.headers.get('etag'),
+            content: (await res.text()).split(/\n+/).filter(line => !/^#.*/.test(line) && line.trim() != '').reduce((curr, line) => {
 
-            return {
-                version: res.headers.get('etag'),
-                content: (await res.text()).split(/\n+/).filter(line => !/^#.*/.test(line) && line.trim() != '').reduce((curr, line) => {
+                line = line.match(/^\s*(?<mediaType>[^\s]+)\s+(?<extensions>.*)\s*$/);
 
-                    line = line.split(/\t+/);
+                let mediaType = line?.groups?.mediaType?.trim()?.toLowerCase();
 
-                    if (line.length > 1) {
+                if (this.#formatMediaType.test(mediaType)) {
 
-                       let mediaType = line[0].trim().toLowerCase();
+                    line?.groups?.extensions?.split(/\s+/)?.forEach(extension => {
 
-                        if (this.#formatMediaType.test(mediaType)) {
+                        extension = extension?.trim()?.toLowerCase()
 
-                            line[1].split(/\s+/).forEach(extension => {
+                        if (this.#formatExtension.test(extension)) {
 
-                                extension = extension.trim().toLowerCase()
-
-                                if (this.#formatExtension.test(extension)) {
-
-                                    curr[extension] = (curr[extension] || []).concat(mediaType);
-
-                                }
-
-                            });
+                            curr[extension] = (curr[extension] || []).concat(mediaType);
 
                         }
 
-                    }
+                    });
 
-                    return curr;
+                }
 
-                }, {})
-            };
+                return curr;
 
-        } catch (err) {
-
-            console.error(err);
-
-            return null;
-
-        }
+            }, {})
+        };
 
     }
 
@@ -137,44 +123,34 @@ class MediaTypes {
 
     #loadNGINX = async res => {
 
-        try {
+        return {
+            version: res.headers.get('etag'),
+            content: (await res.text()).replace(/(\s*types\s*{\s*|\s*}\s*|;)/ig, '').split(/\n+/).filter(line => !/^#.*/.test(line) && line.trim() != '').reduce((curr, line) => {
 
-            return {
-                version: res.headers.get('etag'),
-                content: (await res.text()).replace(/(\s*types\s*{\s*|\s*}\s*)/ig, '').split(';').filter(line => !/^#.*/.test(line) && line.trim() != '').reduce((curr, line) => {
+                line = line.match(/^\s*(?<mediaType>[^\s]+)\s+(?<extensions>.*)\s*$/);
 
-                    line = line.match(/^\s*(?<mediaType>[^\s]+)\s+(?<extensions>.*)\s*$/);
+                let mediaType = line?.groups?.mediaType?.trim()?.toLowerCase();
 
-                    let mediaType = line.groups.mediaType.trim().toLowerCase();
+                if (this.#formatMediaType.test(mediaType)) {
 
-                    if (this.#formatMediaType.test(mediaType)) {
+                    line?.groups?.extensions?.split(/\s+/)?.forEach(extension => {
 
-                        line.groups.extensions.split(/\s+/).forEach(extension => {
+                        extension = extension?.trim()?.toLowerCase()
 
-                            extension = extension.trim().toLowerCase()
+                        if (this.#formatExtension.test(extension)) {
 
-                            if (this.#formatExtension.test(extension)) {
+                            curr[extension] = (curr[extension] || []).concat(mediaType);
 
-                                curr[extension] = (curr[extension] || []).concat(mediaType);
+                        }
 
-                            }
+                    })
 
-                        })
+                }
 
-                    }
+                return curr;
 
-                    return curr;
-
-                }, {})
-            };
-
-        } catch (err) {
-
-            console.error(err);
-
-            return null;
-
-        }
+            }, {})
+        };
 
     }
 
@@ -188,7 +164,7 @@ class MediaTypes {
                 }
             }).then(res => {
 
-                if (res.status == 200 && (Boolean(force) || res.headers.get('etag') != this.#versions.apache)) {
+                if (res.status == 200 && (Boolean(force) || (res.headers.get('etag') && res.headers.get('etag') != this.#versions.apache))) {
 
                     return fetch('https://raw.githubusercontent.com/apache/httpd/trunk/docs/conf/mime.types', {
                         headers: {
@@ -206,7 +182,7 @@ class MediaTypes {
                 }
             }).then(res => {
 
-                if (res.status == 200 && (Boolean(force) || res.headers.get('etag') != this.#versions.debian)) {
+                if (res.status == 200 && (Boolean(force) || (res.headers.get('etag') && res.headers.get('etag') != this.#versions.debian))) {
 
                     return fetch('https://salsa.debian.org/debian/media-types/-/raw/master/mime.types', {
                         headers: {
@@ -224,7 +200,7 @@ class MediaTypes {
                 }
             }).then(res => {
 
-                if (res.status == 200 && (Boolean(force) || res.headers.get('etag') != this.#versions.nginx)) {
+                if (res.status == 200 && (Boolean(force) || (res.headers.get('etag') && res.headers.get('etag') != this.#versions.nginx))) {
 
                     return fetch('https://raw.githubusercontent.com/nginx/nginx/master/conf/mime.types', {
                         headers: {
@@ -243,7 +219,7 @@ class MediaTypes {
 
                 let load = await this.#loadApache(results[0].value);
 
-                if (load) {
+                if (load.version && Object.keys(load.content).length) {
 
                     this.#versions.apache = load.version;
 
@@ -260,7 +236,7 @@ class MediaTypes {
 
                 let load = await this.#loadDebian(results[1].value);
 
-                if (load) {
+                if (load.version && Object.keys(load.content).length) {
 
                     this.#versions.debian = load.version;
 
@@ -277,7 +253,7 @@ class MediaTypes {
 
                 let load = await this.#loadNGINX(results[2].value);
 
-                if (load) {
+                if (load.version && Object.keys(load.content).length) {
 
                     this.#versions.nginx = load.version;
 
@@ -290,16 +266,30 @@ class MediaTypes {
 
             }
 
-            if (Object.keys(list).length) {
+            if (!Object.keys(list).length) {
 
-                fs.writeFileSync(__dirname +'/DB.json', JSON.stringify({
-                    mediaTypes: this.#mediaTypes,
-                    versions: this.#versions
-                }));
-
-                this.#eventEmitter.emit('update', list);
+                return null;
 
             }
+
+            fs.writeFileSync(__dirname +'/DB.json', JSON.stringify({
+                mediaTypes: this.#mediaTypes,
+                versions: this.#versions
+            }));
+
+            list = Object.keys(list).reduce((acc, cur) => {
+
+                Object.keys(list[cur].content).forEach(key => {
+
+                    acc[key] = [...new Set((acc[key] || []).concat(list[cur].content[key]))];
+
+                })
+
+                return acc;
+
+            }, {});
+
+            this.#eventEmitter.emit('update', list);
 
             return list;
 
@@ -337,7 +327,7 @@ class MediaTypes {
 
                 } catch (err) {
 
-                    console.error(err);
+                    this.#eventEmitter.emit('error', err);
 
                 }
 
