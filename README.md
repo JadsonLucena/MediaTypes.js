@@ -1,5 +1,5 @@
 # MediaTypes
-This is a comprehensive compilation of media types that is periodically updated through the following projects: [Apache](https://github.com/apache/httpd/blob/trunk/docs/conf/mime.types), [NGINX](https://github.com/nginx/nginx/blob/master/conf/mime.types) and [Debian](https://salsa.debian.org/debian/media-types/-/blob/master/mime.types)
+This is a comprehensive compilation of media types that may be periodically updated through the following projects: [Apache](https://github.com/apache/httpd/blob/trunk/docs/conf/mime.types), [NGINX](https://github.com/nginx/nginx/blob/master/conf/mime.types) and [Debian](https://salsa.debian.org/debian/media-types/-/blob/master/mime.types)
 
 
 ## What is
@@ -8,10 +8,14 @@ A file's extension has no meaning on the web. In order for the client to interpr
 
 ## Interfaces
 ```typescript
-// Constructor
-constructor(
-    updateInterval?: number = 86400000 // Periodic database update in milliseconds. if less than zero, will be disabled
-)
+/**
+ * @constructor
+ * @fires MediaTypes#update
+ * @fires MediaTypes#error
+ * 
+ * @throws {TypeError} Invalid updateInterval
+ */
+constructor(updateInterval?: number = 86400000)
 ```
 
 ```typescript
@@ -23,35 +27,80 @@ versions(): { apache: string, debian: string, nginx: string }
 
 ```typescript
 // Setters
-updateInterval(
-    updateInterval?: number = 86400000 //  https://developer.mozilla.org/en-US/docs/Web/API/setInterval#delay
-)
+/**
+ * Periodic database update in milliseconds. if less than zero, will be disabled
+ * 
+ * @fires MediaTypes#update
+ * @fires MediaTypes#error
+ * 
+ * @throws {TypeError} Invalid updateInterval
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/setInterval#delay
+ */
+updateInterval(updateInterval?: number = 86400000)
 ```
 
 ```typescript
-// Methods
+/**
+ * @method
+ * @throws {TypeError} Invalid extension
+ * @throws {SyntaxError} Invalid extension
+ * @throws {TypeError} Invalid mediaType
+ * @throws {SyntaxError} Invalid mediaType
+ */
 delete(
     extension: string
     mediaType: string, // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type
 ) boolean
 
+/**
+ * @method
+ * @throws {TypeError} Invalid path
+ * @throws {SyntaxError} Invalid extension
+ */
 get(
     path: string // https://nodejs.org/api/path.html#pathparsepath
 ): string[] // Media type list
 
+/**
+ * @method
+ * @throws {TypeError} Invalid extension
+ * @throws {SyntaxError} Invalid extension
+ * @throws {TypeError} Invalid mediaType
+ * @throws {SyntaxError} Invalid mediaType
+ */
 set(
     extension: string
     mediaType: string, // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type
 ) boolean
 
-update(): null | { [extension: string]: string[] } // List of new inserted media types
+/**
+ * @method
+ * @fires MediaTypes#update
+ */
+update(force?: boolean = false): Promise<null | { [extension: string]: string[] }> // List of new inserted media types
 ```
 
 ```typescript
-// Listeners
-on(name: 'update', callback: (list: { [extension: string]: string[] }) => void): void
-on(name: 'error', callback: (error: Error) => void): void
+// Events
+on('update', callback: (list: { [extension: string]: string[] }) => void): void
+on('error', callback: (error: Error) => void): void
 ```
+
+> This module extends the main methods of the [EventEmitter module](https://nodejs.org/api/events.html#class-eventemitter):
+> - [addListener](https://nodejs.org/api/events.html#emitteraddlistenereventname-listener)
+> - [eventNames](https://nodejs.org/api/events.html#emittereventnames)
+> - [getMaxListeners](https://nodejs.org/api/events.html#emittergetmaxlisteners)
+> - [listenerCount](https://nodejs.org/api/events.html#emitterlistenercounteventname-listener)
+> - [listeners](https://nodejs.org/api/events.html#emitterlistenerseventname)
+> - [off](https://nodejs.org/api/events.html#emitteroffeventname-listener)
+> - [on](https://nodejs.org/api/events.html#emitteroneventname-listener)
+> - [once](https://nodejs.org/api/events.html#emitteronceeventname-listener)
+> - [prependListener](https://nodejs.org/api/events.html#emitterprependlistenereventname-listener)
+> - [prependOnceListener](https://nodejs.org/api/events.html#emitterprependoncelistenereventname-listener)
+> - [removeAllListeners](https://nodejs.org/api/events.html#emitterremovealllistenerseventname)
+> - [removeListener](https://nodejs.org/api/events.html#emitterremovelistenereventname-listener)
+> - [setMaxListeners](https://nodejs.org/api/events.html#emittersetmaxlistenersn)
+> - [rawListeners](https://nodejs.org/api/events.html#emitterrawlistenerseventname)
 
 
 ## QuickStart

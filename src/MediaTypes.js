@@ -2,6 +2,15 @@ const fs = require('node:fs');
 const { parse } = require('node:path');
 const { EventEmitter } = require('node:events');
 
+/**
+ * @class
+ * @classdesc This is a comprehensive compilation of media types that may be periodically updated
+ * 
+ * @typedef {Object} Versions
+ * @property {string} Versions.apache
+ * @property {string} Versions.debian
+ * @property {string} Versions.nginx
+ */
 class MediaTypes {
 
     #eventEmitter;
@@ -19,6 +28,17 @@ class MediaTypes {
     #formatMediaType = new RegExp(`^(?<type>(?:x-)?[a-z0-9]{1,64})\\/(?<subtype>(?:(?<facet>[a-z0-9!#$&\\-^_]+)(?:(?<=\/x)-|\\.))?(?:[a-z0-9!#$&\\-^_]+\\+(?<suffix>[a-z0-9!#$&\\-^_]+)|[a-z0-9!#$&\\-^_]+[.+][a-z0-9!#$&\\-^_]+|[a-z0-9!#$&\\-^_+]+)+){1,64}$`, 'i');
     #formatExtension = new RegExp(`^[a-z0-9!#$&\\-^_+]+$`, 'i');
 
+    /**
+     * Create a MediaType class
+     * @constructor
+     * @param {number} [updateInterval=86400000] - Periodic database update in milliseconds. if less than zero, will be disabled
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/setInterval#delay
+     * 
+     * @fires MediaTypes#update
+     * @fires MediaTypes#error
+     *
+     * @throws {TypeError} Invalid updateInterval
+     */
     constructor(updateInterval = 86400000) {
 
         this.#eventEmitter = new EventEmitter();
@@ -34,9 +54,9 @@ class MediaTypes {
 
             this.#mediaTypes = {};
             this.#versions = {
-                apache: null,
-                debian:  null,
-                nginx: null
+                apache: '',
+                debian:  '',
+                nginx: ''
             };
 
         }
@@ -154,6 +174,14 @@ class MediaTypes {
 
     }
 
+    /**
+     * @method
+     * @param {boolean} [force=false] - Force update even if no version changes
+     *
+     * @fires MediaTypes#update
+     * 
+     * @return {Promise<null | Object.<string, string[]>>} List of all extensions with their media types
+     */
     update = (force = false) => {
 
         return Promise.allSettled([
@@ -289,6 +317,12 @@ class MediaTypes {
 
             }, {});
 
+            /**
+             * Update event
+             *
+             * @event MediaTypes#update
+             * @type {Object.<string, string[]>}
+             */
             this.#eventEmitter.emit('update', list);
 
             return list;
@@ -297,12 +331,42 @@ class MediaTypes {
 
     }
 
+    /**
+     * @return {Object.<string, string[]>}
+     */
+    get list() {
 
-    get list() { return this.#mediaTypes; }
-    get updateInterval() { return this.#updateInterval; }
-    get versions() { return this.#versions; }
+        return this.#mediaTypes;
 
+    }
 
+    /**
+     * @type {number}
+     */
+    get updateInterval() {
+
+        return this.#updateInterval;
+
+    }
+
+    /**
+     * @return {Versions}
+     */
+    get versions() {
+
+        return this.#versions;
+
+    }
+
+    /**
+     * @type {number} [updateInterval=86400000] - Periodic database update in milliseconds. if less than zero, will be disabled
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/setInterval#delay
+     *
+     * @fires MediaTypes#update
+     * @fires MediaTypes#error
+     * 
+     * @throws {TypeError} Invalid updateInterval
+     */
     set updateInterval(updateInterval = 86400000) {
 
         if (
@@ -327,6 +391,12 @@ class MediaTypes {
 
                 } catch (err) {
 
+                    /**
+                     * Error event
+                     *
+                     * @event MediaTypes#error
+                     * @type {Error}
+                     */
                     this.#eventEmitter.emit('error', err);
 
                 }
@@ -337,7 +407,16 @@ class MediaTypes {
 
     }
 
-
+    /**
+     * @method
+     * @param {string} path - File path
+     * @see https://nodejs.org/api/path.html#pathparsepath
+     *
+     * @throws {TypeError} Invalid path
+     * @throws {SyntaxError} Invalid extension
+     *
+     * @return {string[]}
+     */
     get = path => {
 
         if (typeof path != 'string') {
@@ -359,6 +438,18 @@ class MediaTypes {
 
     }
 
+    /**
+     * @method
+     * @param {string} extension - File extension
+     * @param {string} mediaType - {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type IANA media types}
+     *
+     * @throws {TypeError} Invalid extension
+     * @throws {SyntaxError} Invalid extension
+     * @throws {TypeError} Invalid mediaType
+     * @throws {SyntaxError} Invalid mediaType
+     *
+     * @return {boolean}
+     */
     set = (extension, mediaType) => {
 
         if (typeof extension != 'string') {
@@ -401,6 +492,18 @@ class MediaTypes {
 
     }
 
+    /**
+     * @method
+     * @param {string} extension - File extension
+     * @param {string} mediaType - {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type IANA media types}
+     *
+     * @throws {TypeError} Invalid extension
+     * @throws {SyntaxError} Invalid extension
+     * @throws {TypeError} Invalid mediaType
+     * @throws {SyntaxError} Invalid mediaType
+     *
+     * @return {boolean}
+     */
     delete = (extension, mediaType) => {
 
         if (typeof extension != 'string') {
