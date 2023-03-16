@@ -18,6 +18,7 @@ constructor(
 // Getters
 list(): { [extension: string]: string[] } // List of all extensions with their media types
 updateInterval(): number
+versions(): { apache: string, debian: string, nginx: string }
 ```
 
 ```typescript
@@ -31,8 +32,8 @@ updateInterval(
 // Methods
 delete(
     extension: string
-    mediaType: string | string[], // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type
-) string[] // Deleted media type list
+    mediaType: string, // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type
+) boolean
 
 get(
     path: string // https://nodejs.org/api/path.html#pathparsepath
@@ -40,15 +41,16 @@ get(
 
 set(
     extension: string
-    mediaType: string | string[], // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type
-) string[] // Inserted media type list
+    mediaType: string, // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type
+) boolean
 
-update(): { [extension: string]: string[] } // List of new types of media inserted
+update(): null | { [extension: string]: string[] } // List of new inserted media types
 ```
 
 ```typescript
 // Listeners
 on(name: 'update', callback: (list: { [extension: string]: string[] }) => void): void
+on(name: 'error', callback: (error: Error) => void): void
 ```
 
 
