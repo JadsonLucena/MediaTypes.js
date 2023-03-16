@@ -1,4 +1,6 @@
 # MediaTypes
+[![Test Pass](https://github.com/JadsonLucena/MediaTypes.js/workflows/Tests/badge.svg)](https://github.com/JadsonLucena/MediaTypes.js/actions?workflow=Tests)
+[![Coverage Status](https://coveralls.io/repos/github/JadsonLucena/MediaTypes.js/badge.svg)](https://coveralls.io/github/JadsonLucena/MediaTypes.js)
 This is a comprehensive compilation of media types that may be periodically updated through the following projects: [Apache](https://github.com/apache/httpd/blob/trunk/docs/conf/mime.types), [NGINX](https://github.com/nginx/nginx/blob/master/conf/mime.types) and [Debian](https://salsa.debian.org/debian/media-types/-/blob/master/mime.types)
 
 
@@ -102,6 +104,5 @@ on('error', callback: (error: Error) => void): void
 > - [setMaxListeners](https://nodejs.org/api/events.html#emittersetmaxlistenersn)
 > - [rawListeners](https://nodejs.org/api/events.html#emitterrawlistenerseventname)
 
-
-## QuickStart
-[![Edit MediaType.mjs](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/async-cache-6m2we0?autoresize=1&expanddevtools=1&fontsize=14&hidenavigation=1&theme=dark)
+## Specifications
+We strive to maintain complete code coverage in tests. With that, we provide all the necessary use cases for a good understanding of how this module works. See: [test/MediaTypes.spec.js](https://github.com/JadsonLucena/MediaTypes.js/blob/main/test/MediaTypes.spec.js)

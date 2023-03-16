@@ -32,5 +32,22 @@
     "bugs": {
       "url": "https://github.com/JadsonLucena/MediaTypes.js/issues"
     },
-    "homepage": "https://github.com/JadsonLucena/MediaTypes.js#readme"
+    "homepage": "https://github.com/JadsonLucena/MediaTypes.js#readme",
+    "devDependencies": {
+      "jest": "latest"
+    },
+    "jest": {
+      "collectCoverage": true,
+      "verbose": true,
+      "collectCoverageFrom": ["./src/*.js"],
+      "coverageReporters": ["clover", "json", "lcov", "text", "html"],
+      "coverageThreshold": {
+        "global": {
+          "branches": 100,
+          "functions": 100,
+          "lines": 100,
+          "statements": 100
+        }
+      }
+    }
   }
