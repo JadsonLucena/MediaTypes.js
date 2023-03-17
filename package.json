@@ -1,53 +1,63 @@
 {
-    "name": "@jadsonlucena/mediatypes",
-    "version": "0.1.0",
-    "description": "This is a comprehensive compilation of media types that is periodically updated through the following projects: Apache, NGINX and Debian",
-    "main": "./src/MediaTypes.js",
-    "engines": {
-      "node": ">=18"
-    },
-    "scripts": {
-      "test": "jest './test'"
-    },
-    "files": [
-      "src/",
-      "README.md",
-      "LICENSE"
-    ],
-    "repository": {
-      "type": "git",
-      "url": "git+https://github.com/JadsonLucena/MediaTypes.js.git"
-    },
-    "keywords": [
-      "MIME types",
-      "mediatypes",
-      "mime.types",
-      "mime types",
-      "media types",
-      "content-type",
-      "accept"
-    ],
-    "author": "JadsonLucena <jadsonlucena@gmail.com> (https://github.com/JadsonLucena)",
-    "license": "MIT",
-    "bugs": {
-      "url": "https://github.com/JadsonLucena/MediaTypes.js/issues"
-    },
-    "homepage": "https://github.com/JadsonLucena/MediaTypes.js#readme",
-    "devDependencies": {
-      "jest": "latest"
-    },
-    "jest": {
-      "collectCoverage": true,
-      "verbose": true,
-      "collectCoverageFrom": ["./src/*.js"],
-      "coverageReporters": ["clover", "json", "lcov", "text", "html"],
-      "coverageThreshold": {
-        "global": {
-          "branches": 100,
-          "functions": 100,
-          "lines": 100,
-          "statements": 100
-        }
+  "name": "@jadsonlucena/mediatypes",
+  "version": "0.1.0",
+  "description": "This is a comprehensive compilation of media types that is periodically updated through the following projects: Apache, NGINX and Debian",
+  "main": "./src/MediaTypes.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "jest './test'",
+    "eslint": "eslint './src/*.js' './test/*.js'"
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JadsonLucena/MediaTypes.js.git"
+  },
+  "keywords": [
+    "media types",
+    "mediatypes",
+    "mime types",
+    "mime.types",
+    "content-type",
+    "accept"
+  ],
+  "author": "JadsonLucena <jadsonlucena@gmail.com> (https://github.com/JadsonLucena)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JadsonLucena/MediaTypes.js/issues"
+  },
+  "homepage": "https://github.com/JadsonLucena/MediaTypes.js#readme",
+  "devDependencies": {
+    "jest": "latest",
+    "eslint": "latest",
+    "eslint-config-standard": "latest",
+    "eslint-plugin-jest": "latest"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "verbose": true,
+    "collectCoverageFrom": ["./src/*.js"],
+    "coverageReporters": ["clover", "json", "lcov", "text", "html"],
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
       }
     }
+  },
+  "eslintConfig": {
+    "plugins": ["jest"],
+    "env": {
+        "jest/globals": true
+    },
+    "extends": "standard"
   }
+}

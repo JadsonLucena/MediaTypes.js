@@ -1,6 +1,8 @@
 # MediaTypes
 [![Test Pass](https://github.com/JadsonLucena/MediaTypes.js/workflows/Tests/badge.svg)](https://github.com/JadsonLucena/MediaTypes.js/actions?workflow=Tests)
 [![Coverage Status](https://coveralls.io/repos/github/JadsonLucena/MediaTypes.js/badge.svg)](https://coveralls.io/github/JadsonLucena/MediaTypes.js)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
 This is a comprehensive compilation of media types that may be periodically updated through the following projects: [Apache](https://github.com/apache/httpd/blob/trunk/docs/conf/mime.types), [NGINX](https://github.com/nginx/nginx/blob/master/conf/mime.types) and [Debian](https://salsa.debian.org/debian/media-types/-/blob/master/mime.types)
 
 
