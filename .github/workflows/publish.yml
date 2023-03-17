@@ -1,0 +1,45 @@
+name: Publish Package
+
+on:
+  release:
+    types: [created]
+
+jobs:
+
+  github:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@main
+      
+      - uses: actions/setup-node@main
+        with:
+          node-version: latest
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@jadsonlucena'
+
+      - run: npm pack --dry-run
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+  npm:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@main
+      
+      - uses: actions/setup-node@main
+        with:
+          node-version: latest
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@jadsonlucena'
+
+      - run: npm pack --dry-run
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
