@@ -37,7 +37,9 @@
     "jest": "latest",
     "eslint": "latest",
     "eslint-config-standard": "latest",
-    "eslint-plugin-jest": "latest"
+    "eslint-plugin-jest": "latest",
+    "@commitlint/cli": "latest",
+    "@commitlint/config-conventional": "latest"
   },
   "jest": {
     "collectCoverage": true,
@@ -59,5 +61,8 @@
         "jest/globals": true
     },
     "extends": "standard"
+  },
+  "commitlint": {
+    "extends": ["@commitlint/config-conventional"]
   }
 }
