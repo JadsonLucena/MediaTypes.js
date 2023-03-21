@@ -19,6 +19,7 @@ To get an overview of the project, read the [README](README.md). Here are some r
 - [Fork the repo](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo#fork-an-example-repository)
 - [Set up Git](https://docs.github.com/en/get-started/quickstart/set-up-git)
 - [Set up Node.js](https://nodejs.org/en/download)
+- [Run test and lint to validate your commit with GitHooks for Node.js](https://gist.github.com/JadsonLucena/903b6b95917328c21064b7d3c9248417)
 
 ### Running the tests
 
