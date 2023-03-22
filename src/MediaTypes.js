@@ -19,12 +19,8 @@ class MediaTypes {
   #updateInterval
   #updateLoop
 
-  // https://www.rfc-editor.org/rfc/rfc4288#section-4.2
   // https://www.rfc-editor.org/rfc/rfc6838#section-4.2
-  // https://www.rfc-editor.org/rfc/rfc2045#section-5.1
-  // https://www.rfc-editor.org/rfc/rfc2231#section-7
-  // https://www.rfc-editor.org/rfc/rfc5987#section-3.2.1
-  #formatMediaType = /^(?<type>(?:x-)?[a-z0-9]{1,64})\/(?<subtype>(?:(?<facet>[a-z0-9!#$&\-^_]+)(?:(?<=\/x)-|\.))?(?:[a-z0-9!#$&\-^_]+\+(?<suffix>[a-z0-9!#$&\-^_]+)|[a-z0-9!#$&\-^_]+[.+][a-z0-9!#$&\-^_]+|[a-z0-9!#$&\-^_+]+)+){1,64}$/i
+  #formatMediaType = /^(?<type>(x-[a-z0-9]{1,62}|[a-z0-9]{1,64}))\/(?<subtype>[a-z0-9!#$&\-^_.+]{1,64})$/i
   #formatExtension = /^[a-z0-9!#$&\-^_+]+$/i
 
   /**
