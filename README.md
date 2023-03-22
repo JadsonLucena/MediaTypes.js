@@ -1,4 +1,5 @@
 # MediaTypes
+[![CodeQL](https://github.com/JadsonLucena/MediaTypes.js/workflows/CodeQL/badge.svg)](https://github.com/JadsonLucena/MediaTypes.js/actions?workflow=CodeQL)
 [![Test Pass](https://github.com/JadsonLucena/MediaTypes.js/workflows/Tests/badge.svg)](https://github.com/JadsonLucena/MediaTypes.js/actions?workflow=Tests)
 [![Coverage Status](https://coveralls.io/repos/github/JadsonLucena/MediaTypes.js/badge.svg)](https://coveralls.io/github/JadsonLucena/MediaTypes.js)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
