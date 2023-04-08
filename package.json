@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "jest './test'",
-    "eslint": "eslint './src/*.js' './test/*.js'"
+    "lint": "eslint './src/*.js' './test/*.js'"
   },
   "files": [
     "src/",

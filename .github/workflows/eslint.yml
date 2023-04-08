@@ -1,14 +1,14 @@
-name: ESLint
+name: eslint
 
 on:
   push:
     paths:
       - 'src/**'
-      - 'tests/**'
+      - 'test/**'
   pull_request:
     paths:
       - 'src/**'
-      - 'tests/**'
+      - 'test/**'
 
 jobs:
 
@@ -25,4 +25,4 @@ jobs:
           node-version: latest
 
       - run: npm install
-      - run: npm run eslint
+      - run: npm run lint
