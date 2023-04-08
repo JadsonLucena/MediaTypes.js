@@ -78,53 +78,35 @@ class MediaTypes {
     return list
   }
 
-  #loadApache = async res => {
+  #load = async res => {
     return {
       version: res.headers.get('etag'),
-      content: (await res.text()).split(/\n+/).filter(line => !/^#.*/.test(line) && line.trim() !== '').reduce((curr, line) => {
-        line = line.match(/^\s*(?<mediaType>[^\s]+)\s+(?<extensions>.*)\s*$/)
+      content: (await res.text())
+        .split(/\n+/)
+        .reduce((curr, line) => {
+          line = line.trim()
+          line = line.replace(/(\s*types\s*{\s*|\s*}\s*|\s*;\s*)$/ig, '') // remove non-standard characters coming from nginx when it fits
 
-        const mediaType = line?.groups?.mediaType?.trim()?.toLowerCase()
+          if (/^\s*#.*$/.test(line) || line === '') {
+            return curr
+          }
 
-        if (this.#formatMediaType.test(mediaType)) {
-          line?.groups?.extensions?.split(/\s+/)?.forEach(extension => {
-            extension = extension?.trim()?.toLowerCase()
+          line = line.match(/^(?<mediaType>[^\s]+)\s+(?<extensions>.*)$/)
 
-            if (this.#formatExtension.test(extension)) {
-              curr[extension] = (curr[extension] || []).concat(mediaType)
-            }
-          })
-        }
+          const mediaType = line?.groups?.mediaType?.trim()?.toLowerCase()
 
-        return curr
-      }, {})
-    }
-  }
+          if (this.#formatMediaType.test(mediaType)) {
+            line?.groups?.extensions?.split(/\s+/)?.forEach(extension => {
+              extension = extension?.trim()?.toLowerCase()
 
-  #loadDebian = async res => {
-    return await this.#loadApache(res)
-  }
+              if (this.#formatExtension.test(extension)) {
+                curr[extension] = (curr[extension] || []).concat(mediaType)
+              }
+            })
+          }
 
-  #loadNGINX = async res => {
-    return {
-      version: res.headers.get('etag'),
-      content: (await res.text()).replace(/(\s*types\s*{\s*|\s*}\s*|;)/ig, '').split(/\n+/).filter(line => !/^#.*/.test(line) && line.trim() !== '').reduce((curr, line) => {
-        line = line.match(/^\s*(?<mediaType>[^\s]+)\s+(?<extensions>.*)\s*$/)
-
-        const mediaType = line?.groups?.mediaType?.trim()?.toLowerCase()
-
-        if (this.#formatMediaType.test(mediaType)) {
-          line?.groups?.extensions?.split(/\s+/)?.forEach(extension => {
-            extension = extension?.trim()?.toLowerCase()
-
-            if (this.#formatExtension.test(extension)) {
-              curr[extension] = (curr[extension] || []).concat(mediaType)
-            }
-          })
-        }
-
-        return curr
-      }, {})
+          return curr
+        }, {})
     }
   }
 
@@ -184,7 +166,7 @@ class MediaTypes {
       let list = {}
 
       if (results[0].status === 'fulfilled' && results[0].value) {
-        const load = await this.#loadApache(results[0].value)
+        const load = await this.#load(results[0].value)
 
         if (load.version && Object.keys(load.content).length) {
           this.#versions.apache = load.version
@@ -197,7 +179,7 @@ class MediaTypes {
       }
 
       if (results[1].status === 'fulfilled' && results[1].value) {
-        const load = await this.#loadDebian(results[1].value)
+        const load = await this.#load(results[1].value)
 
         if (load.version && Object.keys(load.content).length) {
           this.#versions.debian = load.version
@@ -210,7 +192,7 @@ class MediaTypes {
       }
 
       if (results[2].status === 'fulfilled' && results[2].value) {
-        const load = await this.#loadNGINX(results[2].value)
+        const load = await this.#load(results[2].value)
 
         if (load.version && Object.keys(load.content).length) {
           this.#versions.nginx = load.version
