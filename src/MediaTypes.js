@@ -255,7 +255,7 @@ class MediaTypes {
   }
 
   /**
-   * @type {number} [updateInterval=86400000] - Periodic database update in milliseconds. if less than zero, will be disabled
+   * @type {number} [updateInterval=86400000]
    * @see https://developer.mozilla.org/en-US/docs/Web/API/setInterval#delay
    *
    * @fires MediaTypes#update
