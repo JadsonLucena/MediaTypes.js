@@ -7,8 +7,8 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "jest './test'",
-    "lint": "eslint './src/*.js' './test/*.js'"
+    "test": "jest ./test",
+    "lint": "eslint ./src ./test --ext .js"
   },
   "files": [
     "src/",
