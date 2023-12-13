@@ -1,6 +1,6 @@
 {
   "name": "@jadsonlucena/mediatypes",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "This is a comprehensive compilation of media types that is periodically updated through the following projects: Apache, NGINX and Debian",
   "main": "./src/MediaTypes.js",
   "engines": {
