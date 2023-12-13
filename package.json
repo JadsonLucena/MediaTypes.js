@@ -4,7 +4,7 @@
   "description": "This is a comprehensive compilation of media types that is periodically updated through the following projects: Apache, NGINX and Debian",
   "main": "./src/MediaTypes.js",
   "engines": {
-    "node": ">=18"
+    "node": ">=18.13"
   },
   "scripts": {
     "test": "jest ./test",

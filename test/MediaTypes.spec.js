@@ -1,5 +1,8 @@
+'use strict'
+
 const fs = require('node:fs')
 const { EventEmitter, errorMonitor } = require('node:events')
+const { MIMEType } = require('node:util')
 
 jest.useFakeTimers()
 jest.spyOn(global, 'setInterval')
@@ -131,7 +134,7 @@ describe('Attributes', () => {
     const mediaType = new MediaTypes()
 
     expect(mediaType.list).toMatchObject({
-      txt: ['text/plain']
+      txt: [new MIMEType('text/plain')]
     })
 
     expect(mediaType.versions).toMatchObject({
@@ -197,7 +200,7 @@ describe('Methods', () => {
       const mediaType = new MediaTypes(-1);
 
       ['path/to/fileName.txt', 'fileName.txt'].forEach(path => {
-        expect(mediaType.get(path)).toContain('text/plain')
+        expect(mediaType.get(path)).toContainEqual(new MIMEType('text/plain'))
       })
     })
   })
@@ -233,17 +236,19 @@ describe('Methods', () => {
       const extension = 'test'
       const contentType = ['application/x-test', 'application/octet-stream']
 
-      expect(mediaType.set(extension, contentType[0])).toBeTruthy()
-      expect(mediaType.get(`fileName.${extension}`)).toContain(contentType[0])
+      expect(mediaType.set(extension, `${contentType[0]};key=value`)).toBeTruthy()
+      expect(mediaType.set(extension, contentType[0])).toBeFalsy()
+      expect(mediaType.get(`fileName.${extension}`)).toContainEqual(new MIMEType(`${contentType[0]};key=value`))
 
       expect(mediaType.set(extension, contentType[1])).toBeTruthy()
-      expect(mediaType.get(`fileName.${extension}`)).toContain(contentType[1])
+      expect(mediaType.get(`fileName.${extension}`)).toContainEqual(new MIMEType(contentType[1]))
     })
 
     test('Given that one wants to set an already existing media type into the module list', () => {
       const mediaType = new MediaTypes(-1)
 
       expect(mediaType.set('txt', 'text/plain')).toBeFalsy()
+      expect(mediaType.set('txt', 'text/plain;key=value')).toBeFalsy()
     })
   })
 
@@ -280,7 +285,7 @@ describe('Methods', () => {
 
       expect(mediaType.delete(extension, contentType)).toBeTruthy()
       expect(extension in mediaType.list).toBeFalsy()
-      expect(mediaType.get(`fileName.${extension}`)).not.toContain(contentType)
+      expect(mediaType.get(`fileName.${extension}`)).not.toContainEqual(new MIMEType(contentType))
     })
 
     test('Given that one wants to delete a media type that does not exist in the module list', () => {
@@ -297,7 +302,7 @@ describe('Methods', () => {
 
       expect(mediaType.set(extension, 'application/octet-stream')).toBeTruthy()
       expect(mediaType.delete(extension, 'text/plain')).toBeTruthy()
-      expect(mediaType.get(`fileName.${extension}`)).toContain('application/octet-stream')
+      expect(mediaType.get(`fileName.${extension}`)).toContainEqual(new MIMEType('application/octet-stream'))
     })
   })
 
@@ -315,7 +320,7 @@ describe('Methods', () => {
       await expect(mediaType.update().then(res => {
         return Object.keys(res)
       })).resolves.toContain(extension)
-      expect(mediaType.get(`fileName.${extension}`)).toContain(contentType)
+      expect(mediaType.get(`fileName.${extension}`)).toContainEqual(new MIMEType(contentType))
     })
 
     test('Given that one wants to try to force update the list of media types at some point', async () => {
@@ -336,7 +341,7 @@ describe('Methods', () => {
         return Object.keys(res)
       })).resolves.toContain(extension)
 
-      expect(mediaType.get(`fileName.${extension}`)).toContain(contentType)
+      expect(mediaType.get(`fileName.${extension}`)).toContainEqual(new MIMEType(contentType))
     })
   })
 })

@@ -1,6 +1,13 @@
+'use strict'
+
 const fs = require('node:fs')
 const { parse, join } = require('node:path')
 const { EventEmitter } = require('node:events')
+const { MIMEType } = require('node:util')
+
+function removeDuplicates (array) {
+  return array.filter((v, i, a) => a.findIndex(t => t.essence === v.essence) === i)
+}
 
 /**
  * @class
@@ -19,8 +26,6 @@ class MediaTypes {
   #updateInterval
   #updateLoop
 
-  // https://www.rfc-editor.org/rfc/rfc6838#section-4.2
-  #formatMediaType = /^(?<type>(x-[a-z0-9]{1,62}|[a-z0-9]{1,64}))\/(?<subtype>[a-z0-9!#$&\-^_.+]{1,64})$/i
   #formatExtension = /^[a-z0-9!#$&\-^_+]+$/i
 
   /**
@@ -40,7 +45,11 @@ class MediaTypes {
     try {
       const { mediaTypes, versions } = JSON.parse(fs.readFileSync(join(__dirname, 'DB.json')).toString('utf8'))
 
-      this.#mediaTypes = mediaTypes
+      this.#mediaTypes = Object.keys(mediaTypes).reduce((acc, key) => {
+        acc[key] = mediaTypes[key].map(mediaType => new MIMEType(mediaType))
+
+        return acc
+      }, {})
       this.#versions = versions
     } catch (err) {
       this.#mediaTypes = {}
@@ -54,6 +63,14 @@ class MediaTypes {
     this.updateInterval = updateInterval
   }
 
+  #isMediaType = mediaType => {
+    try {
+      return new MIMEType(mediaType)
+    } catch (err) {
+      return false
+    }
+  }
+
   #updateList = content => {
     const list = {}
 
@@ -62,16 +79,16 @@ class MediaTypes {
 
       if (extension in this.#mediaTypes) {
         content[extension].forEach(mediaType => {
-          mediaType = mediaType.trim().toLowerCase()
+          mediaType = new MIMEType(mediaType)
 
-          if (!this.#mediaTypes[extension].includes(mediaType)) {
+          if (!this.#mediaTypes[extension].some(MT => MT.essence === mediaType.essence)) {
             this.#mediaTypes[extension] = this.#mediaTypes[extension].concat(mediaType).sort()
 
             list[extension] = (list[extension] || []).concat(mediaType)
           }
         })
       } else {
-        list[extension] = this.#mediaTypes[extension] = content[extension]
+        list[extension] = this.#mediaTypes[extension] = removeDuplicates(content[extension].map(mediaType => new MIMEType(mediaType)))
       }
     }
 
@@ -93,9 +110,9 @@ class MediaTypes {
 
           line = line.match(/^(?<mediaType>[^\s]+)\s+(?<extensions>.*)$/)
 
-          const mediaType = line?.groups?.mediaType?.trim()?.toLowerCase()
+          const mediaType = line?.groups?.mediaType
 
-          if (this.#formatMediaType.test(mediaType)) {
+          if (this.#isMediaType(mediaType)) {
             line?.groups?.extensions?.split(/\s+/)?.forEach(extension => {
               extension = extension?.trim()?.toLowerCase()
 
@@ -116,7 +133,7 @@ class MediaTypes {
    *
    * @fires MediaTypes#update
    *
-   * @return {Promise<null | Object.<string, string[]>>} List of all extensions with their media types
+   * @return {Promise<null | Object.<string, MIMEType[]>>} List of all extensions with their media types
    */
   update = (force = false) => {
     return Promise.allSettled([
@@ -215,7 +232,7 @@ class MediaTypes {
 
       list = Object.keys(list).reduce((acc, cur) => {
         Object.keys(list[cur].content).forEach(key => {
-          acc[key] = [...new Set((acc[key] || []).concat(list[cur].content[key]))]
+          acc[key] = removeDuplicates((acc[key] || []).concat(list[cur].content[key]))
         })
 
         return acc
@@ -225,7 +242,7 @@ class MediaTypes {
        * Update event
        *
        * @event MediaTypes#update
-       * @type {Object.<string, string[]>}
+       * @type {Object.<string, MIMEType[]>}
        */
       this.#eventEmitter.emit('update', list)
 
@@ -234,7 +251,7 @@ class MediaTypes {
   }
 
   /**
-   * @return {Object.<string, string[]>}
+   * @return {Object.<string, MIMEType[]>}
    */
   get list () {
     return this.#mediaTypes
@@ -301,7 +318,7 @@ class MediaTypes {
    * @throws {TypeError} Invalid path
    * @throws {SyntaxError} Invalid extension
    *
-   * @return {string[]}
+   * @return {MIMEType[]}
    */
   get = path => {
     if (typeof path !== 'string') {
@@ -315,7 +332,7 @@ class MediaTypes {
       throw new SyntaxError('Invalid extension')
     }
 
-    return this.#mediaTypes[extension] || []
+    return (this.#mediaTypes[extension] || [])
   }
 
   /**
@@ -339,7 +356,7 @@ class MediaTypes {
 
     if (typeof mediaType !== 'string') {
       throw new TypeError('Invalid mediaType')
-    } else if (!this.#formatMediaType.test(mediaType)) {
+    } else if (!this.#isMediaType(mediaType)) {
       throw new SyntaxError('Invalid mediaType')
     }
 
@@ -383,7 +400,7 @@ class MediaTypes {
 
     if (typeof mediaType !== 'string') {
       throw new TypeError('Invalid mediaType')
-    } else if (!this.#formatMediaType.test(mediaType)) {
+    } else if (!this.#isMediaType(mediaType)) {
       throw new SyntaxError('Invalid mediaType')
     }
 
@@ -391,7 +408,7 @@ class MediaTypes {
       return false
     }
 
-    const i = this.#mediaTypes[extension].indexOf(mediaType.trim().toLowerCase())
+    const i = this.#mediaTypes[extension].findIndex(MT => MT.essence === new MIMEType(mediaType).essence)
 
     if (i < 0) {
       return false

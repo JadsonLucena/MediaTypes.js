@@ -26,7 +26,7 @@ constructor(updateInterval?: number = 86400000)
 
 ```typescript
 // Getters
-list(): { [extension: string]: string[] } // List of all extensions with their media types
+list(): { [extension: string]: MIMEType[] } // List of all extensions with their media types
 updateInterval(): number
 versions(): { apache: string, debian: string, nginx: string }
 ```
@@ -42,7 +42,7 @@ versions(): { apache: string, debian: string, nginx: string }
  * @throws {TypeError} Invalid updateInterval
  * @see https://developer.mozilla.org/en-US/docs/Web/API/setInterval#delay
  */
-updateInterval(updateInterval?: number = 86400000)
+updateInterval(updateInterval?: number = 86400000): void
 ```
 
 ```typescript
@@ -56,7 +56,7 @@ updateInterval(updateInterval?: number = 86400000)
 delete(
     extension: string
     mediaType: string, // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type
-) boolean
+): boolean
 
 /**
  * @method
@@ -65,7 +65,7 @@ delete(
  */
 get(
     path: string // https://nodejs.org/api/path.html#pathparsepath
-): string[] // Media type list
+): MIMEType[] // https://nodejs.org/api/util.html#class-utilmimetype
 
 /**
  * @method
@@ -77,18 +77,18 @@ get(
 set(
     extension: string
     mediaType: string, // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type
-) boolean
+): boolean
 
 /**
  * @method
  * @fires MediaTypes#update
  */
-update(force?: boolean = false): Promise<null | { [extension: string]: string[] }> // List of new inserted media types
+update(force?: boolean = false): Promise<null | { [extension: string]: MIMEType[] }> // List of new inserted media types
 ```
 
 ```typescript
 // Events
-on('update', callback: (list: { [extension: string]: string[] }) => void): void
+on('update', callback: (list: { [extension: string]: MIMEType[] }) => void): void
 on('error', callback: (error: Error) => void): void
 ```
 
