@@ -63,7 +63,7 @@ class MediaTypes {
     this.updateInterval = updateInterval
   }
 
-  #isMediaType = mediaType => {
+  #isMediaType (mediaType) {
     try {
       return new MIMEType(mediaType)
     } catch (err) {
@@ -71,7 +71,7 @@ class MediaTypes {
     }
   }
 
-  #updateList = content => {
+  #updateList (content) {
     const list = {}
 
     for (let extension in content) {
@@ -95,7 +95,7 @@ class MediaTypes {
     return list
   }
 
-  #load = async res => {
+  async #load (res) {
     return {
       version: res.headers.get('etag'),
       content: (await res.text())
@@ -135,7 +135,7 @@ class MediaTypes {
    *
    * @return {Promise<null | Object.<string, MIMEType[]>>} List of all extensions with their media types
    */
-  update = (force = false) => {
+  update (force = false) {
     return Promise.allSettled([
       fetch('https://raw.githubusercontent.com/apache/httpd/trunk/docs/conf/mime.types', { // https://github.com/apache/httpd/blob/trunk/docs/conf/mime.types
         method: 'HEAD',
@@ -251,27 +251,6 @@ class MediaTypes {
   }
 
   /**
-   * @return {Object.<string, MIMEType[]>}
-   */
-  get list () {
-    return this.#mediaTypes
-  }
-
-  /**
-   * @type {number}
-   */
-  get updateInterval () {
-    return this.#updateInterval
-  }
-
-  /**
-   * @return {Versions}
-   */
-  get versions () {
-    return this.#versions
-  }
-
-  /**
    * @type {number} [updateInterval=86400000]
    * @see https://developer.mozilla.org/en-US/docs/Web/API/setInterval#delay
    *
@@ -311,6 +290,27 @@ class MediaTypes {
   }
 
   /**
+   * @type {number}
+   */
+  get updateInterval () {
+    return this.#updateInterval
+  }
+
+  /**
+   * @return {Versions}
+   */
+  get versions () {
+    return this.#versions
+  }
+
+  /**
+   * @return {Object.<string, MIMEType[]>}
+   */
+  get list () {
+    return this.#mediaTypes
+  }
+
+  /**
    * @method
    * @param {string} path - File path
    * @see https://nodejs.org/api/path.html#pathparsepath
@@ -320,7 +320,7 @@ class MediaTypes {
    *
    * @return {MIMEType[]}
    */
-  get = path => {
+  get (path) {
     if (typeof path !== 'string') {
       throw new TypeError('Invalid path')
     }
@@ -347,7 +347,7 @@ class MediaTypes {
    *
    * @return {boolean}
    */
-  set = (extension, mediaType) => {
+  set (extension, mediaType) {
     if (typeof extension !== 'string') {
       throw new TypeError('Invalid extension')
     } else if (!this.#formatExtension.test(extension)) {
@@ -389,7 +389,7 @@ class MediaTypes {
    *
    * @return {boolean}
    */
-  delete = (extension, mediaType) => {
+  delete (extension, mediaType) {
     if (typeof extension !== 'string') {
       throw new TypeError('Invalid extension')
     } else if (!this.#formatExtension.test(extension)) {
