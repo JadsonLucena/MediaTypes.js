@@ -335,7 +335,7 @@ describe('Methods', () => {
 
       expect(mediaType.delete(extension, contentType)).toBeTruthy()
 
-      await expect(mediaType.update()).resolves.toBeNull()
+      await expect(mediaType.update()).resolves.toStrictEqual({})
 
       await expect(mediaType.update(true).then(res => {
         return Object.keys(res)
@@ -361,7 +361,7 @@ describe('Fetch', () => {
 
     const mediaType = new MediaTypes(-1)
 
-    return expect(mediaType.update()).resolves.toBeNull()
+    return expect(mediaType.update()).resolves.toStrictEqual({})
   })
 
   test('Given that one wants to try to update the list of media types at some point and there was an error processing the media types or the file extension', () => {
@@ -381,7 +381,7 @@ describe('Fetch', () => {
 
     const mediaType = new MediaTypes(-1)
 
-    return expect(mediaType.update()).resolves.toBeNull()
+    return expect(mediaType.update()).resolves.toStrictEqual({})
   })
 
   test('Given that the update method was called and the request returns an invalid data type', () => {
@@ -398,7 +398,7 @@ describe('Fetch', () => {
 
     const mediaType = new MediaTypes(-1)
 
-    return expect(mediaType.update()).resolves.toBeNull()
+    return expect(mediaType.update()).resolves.toStrictEqual({})
   })
 
   test('Given that the update method was called and the request does not have an etag header', () => {
@@ -414,7 +414,7 @@ describe('Fetch', () => {
 
     const mediaType = new MediaTypes(-1)
 
-    return expect(mediaType.update()).resolves.toBeNull()
+    return expect(mediaType.update()).resolves.toStrictEqual({})
   })
 
   test('Given that the update method was called and the request returns an error', () => {
@@ -431,7 +431,7 @@ describe('Fetch', () => {
 
     const mediaType = new MediaTypes(-1)
 
-    return expect(mediaType.update()).resolves.toBeNull()
+    return expect(mediaType.update()).resolves.toStrictEqual({})
   })
 
   test('Given that the update method was called and the fetch function throws an exception', () => {
@@ -443,7 +443,7 @@ describe('Fetch', () => {
 
     const mediaType = new MediaTypes(-1)
 
-    return expect(mediaType.update()).resolves.toBeNull()
+    return expect(mediaType.update()).resolves.toStrictEqual({})
   })
 
   test('Given that the update method was called and the fetch function is rejected', () => {
@@ -455,7 +455,7 @@ describe('Fetch', () => {
 
     const mediaType = new MediaTypes(-1)
 
-    return expect(mediaType.update()).resolves.toBeNull()
+    return expect(mediaType.update()).resolves.toStrictEqual({})
   })
 })
 

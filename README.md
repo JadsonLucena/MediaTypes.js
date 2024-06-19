@@ -1,7 +1,7 @@
 # MediaTypes
 [![CodeQL](https://github.com/JadsonLucena/MediaTypes.js/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/JadsonLucena/MediaTypes.js/actions/workflows/github-code-scanning/codeql)
 [![Test](https://github.com/JadsonLucena/MediaTypes.js/actions/workflows/test.yml/badge.svg)](https://github.com/JadsonLucena/MediaTypes.js/actions/workflows/test.yml)
-[![Coverage Status](https://coveralls.io/repos/github/JadsonLucena/MediaTypes.js/badge.svg)](https://coveralls.io/github/JadsonLucena/MediaTypes.js)
+[![Coverage](https://coveralls.io/repos/github/JadsonLucena/MediaTypes.js/badge.svg)](https://coveralls.io/github/JadsonLucena/MediaTypes.js)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 
