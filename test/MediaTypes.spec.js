@@ -206,7 +206,7 @@ describe('Methods', () => {
   })
 
   describe('set', () => {
-    test('Given that one wants to set a new media type in the module list by passing an invalid path argument', () => {
+    test('Given that one wants to set a new media type in the list by passing invalid arguments', () => {
       const mediaType = new MediaTypes(-1);
 
       [-1, 0, 1, false, null, NaN, Infinity, {}, []].forEach(path => {
@@ -215,11 +215,7 @@ describe('Methods', () => {
 
       ['fileName.', '.txt', ''].forEach(path => {
         expect(() => mediaType.set(path, 'application/x-test')).toThrow(new SyntaxError('Invalid extension'))
-      })
-    })
-
-    test('Given that one wants to set a new media type in the module list by passing an invalid mediaTypes argument', () => {
-      const mediaType = new MediaTypes(-1);
+      });
 
       [-1, 0, 1, false, null, NaN, Infinity, {}, []].forEach(mediaTypes => {
         expect(() => mediaType.set('test', mediaTypes)).toThrow(new TypeError('Invalid mediaType'))
@@ -228,6 +224,11 @@ describe('Methods', () => {
       ['application', 'application/', '/x-test', ''].forEach(mediaTypes => {
         expect(() => mediaType.set('test', mediaTypes)).toThrow(new SyntaxError('Invalid mediaType'))
       })
+
+      expect(() => mediaType.set(undefined, undefined)).toThrowError(new AggregateError([
+        'Invalid extension',
+        'Invalid mediaType'
+      ], 'Invalid arguments'))
     })
 
     test('Given that one wants to set a new media type in the module list', () => {
@@ -253,7 +254,7 @@ describe('Methods', () => {
   })
 
   describe('delete', () => {
-    test('Given that one wants to delete a new media type in the module list by passing an invalid path argument', () => {
+    test('Given that one wants to delete a media type by passing an invalid arguments', () => {
       const mediaType = new MediaTypes(-1);
 
       [-1, 0, 1, false, null, NaN, Infinity, {}, []].forEach(path => {
@@ -262,11 +263,7 @@ describe('Methods', () => {
 
       ['fileName.', '.txt', ''].forEach(path => {
         expect(() => mediaType.delete(path, 'application/x-test')).toThrow(new SyntaxError('Invalid extension'))
-      })
-    })
-
-    test('Given that one wants to delete a new media type in the module list by passing an invalid mediaTypes argument', () => {
-      const mediaType = new MediaTypes(-1);
+      });
 
       [-1, 0, 1, false, null, NaN, Infinity, {}, []].forEach(mediaTypes => {
         expect(() => mediaType.delete('test', mediaTypes)).toThrow(new TypeError('Invalid mediaType'))
@@ -275,6 +272,11 @@ describe('Methods', () => {
       ['application', 'application/', '/x-test', ''].forEach(mediaTypes => {
         expect(() => mediaType.delete('test', mediaTypes)).toThrow(new SyntaxError('Invalid mediaType'))
       })
+
+      expect(() => mediaType.delete(undefined, undefined)).toThrowError(new AggregateError([
+        'Invalid extension',
+        'Invalid mediaType'
+      ], 'Invalid arguments'))
     })
 
     test('Given that one wants to delete an existing media type in the module list', () => {

@@ -64,6 +64,7 @@ declare module '@jadsonlucena/mediatypes' {
      *
      * @throws {TypeError|SyntaxError} Invalid extension
      * @throws {TypeError|SyntaxError} Invalid mediaType
+     * @throws {AggregateError} Invalid arguments
      *
      * @return {boolean}
      */
@@ -75,6 +76,7 @@ declare module '@jadsonlucena/mediatypes' {
      *
      * @throws {TypeError|SyntaxError} Invalid extension
      * @throws {TypeError|SyntaxError} Invalid mediaType
+     * @throws {AggregateError} Invalid arguments
      *
      * @return {boolean}
      */

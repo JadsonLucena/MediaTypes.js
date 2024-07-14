@@ -338,20 +338,29 @@ class MediaTypes {
    *
    * @throws {TypeError|SyntaxError} Invalid extension
    * @throws {TypeError|SyntaxError} Invalid mediaType
+   * @throws {AggregateError} Invalid arguments
    *
    * @return {boolean}
    */
   set (extension, mediaType) {
+    const errors = []
+
     if (typeof extension !== 'string') {
-      throw new TypeError('Invalid extension')
+      errors.push(new TypeError('Invalid extension'))
     } else if (!this.#formatExtension.test(extension)) {
-      throw new SyntaxError('Invalid extension')
+      errors.push(new SyntaxError('Invalid extension'))
     }
 
     if (typeof mediaType !== 'string') {
-      throw new TypeError('Invalid mediaType')
+      errors.push(new TypeError('Invalid mediaType'))
     } else if (!this.#isMediaType(mediaType)) {
-      throw new SyntaxError('Invalid mediaType')
+      errors.push(new SyntaxError('Invalid mediaType'))
+    }
+
+    if (errors.length > 1) {
+      throw new AggregateError(errors, 'Invalid arguments')
+    } else if (errors.length === 1) {
+      throw errors.pop()
     }
 
     const content = {}
@@ -378,23 +387,32 @@ class MediaTypes {
    *
    * @throws {TypeError|SyntaxError} Invalid extension
    * @throws {TypeError|SyntaxError} Invalid mediaType
+   * @throws {AggregateError} Invalid arguments
    *
    * @return {boolean}
    */
   delete (extension, mediaType) {
+    const errors = []
+
     if (typeof extension !== 'string') {
-      throw new TypeError('Invalid extension')
+      errors.push(new TypeError('Invalid extension'))
     } else if (!this.#formatExtension.test(extension)) {
-      throw new SyntaxError('Invalid extension')
+      errors.push(new SyntaxError('Invalid extension'))
+    }
+
+    if (typeof mediaType !== 'string') {
+      errors.push(new TypeError('Invalid mediaType'))
+    } else if (!this.#isMediaType(mediaType)) {
+      errors.push(new SyntaxError('Invalid mediaType'))
+    }
+
+    if (errors.length > 1) {
+      throw new AggregateError(errors, 'Invalid arguments')
+    } else if (errors.length === 1) {
+      throw errors.pop()
     }
 
     extension = extension.trim().toLowerCase()
-
-    if (typeof mediaType !== 'string') {
-      throw new TypeError('Invalid mediaType')
-    } else if (!this.#isMediaType(mediaType)) {
-      throw new SyntaxError('Invalid mediaType')
-    }
 
     if (!(extension in this.#mediaTypes)) {
       return false
