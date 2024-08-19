@@ -206,7 +206,7 @@ describe('Methods', () => {
   })
 
   describe('set', () => {
-    test('Given that one wants to set a new media type in the module list by passing an invalid path argument', () => {
+    test('Given that one wants to set a new media type in the list by passing invalid arguments', () => {
       const mediaType = new MediaTypes(-1);
 
       [-1, 0, 1, false, null, NaN, Infinity, {}, []].forEach(path => {
@@ -215,11 +215,7 @@ describe('Methods', () => {
 
       ['fileName.', '.txt', ''].forEach(path => {
         expect(() => mediaType.set(path, 'application/x-test')).toThrow(new SyntaxError('Invalid extension'))
-      })
-    })
-
-    test('Given that one wants to set a new media type in the module list by passing an invalid mediaTypes argument', () => {
-      const mediaType = new MediaTypes(-1);
+      });
 
       [-1, 0, 1, false, null, NaN, Infinity, {}, []].forEach(mediaTypes => {
         expect(() => mediaType.set('test', mediaTypes)).toThrow(new TypeError('Invalid mediaType'))
@@ -228,6 +224,11 @@ describe('Methods', () => {
       ['application', 'application/', '/x-test', ''].forEach(mediaTypes => {
         expect(() => mediaType.set('test', mediaTypes)).toThrow(new SyntaxError('Invalid mediaType'))
       })
+
+      expect(() => mediaType.set(undefined, undefined)).toThrowError(new AggregateError([
+        'Invalid extension',
+        'Invalid mediaType'
+      ], 'Invalid arguments'))
     })
 
     test('Given that one wants to set a new media type in the module list', () => {
@@ -253,7 +254,7 @@ describe('Methods', () => {
   })
 
   describe('delete', () => {
-    test('Given that one wants to delete a new media type in the module list by passing an invalid path argument', () => {
+    test('Given that one wants to delete a media type by passing an invalid arguments', () => {
       const mediaType = new MediaTypes(-1);
 
       [-1, 0, 1, false, null, NaN, Infinity, {}, []].forEach(path => {
@@ -262,11 +263,7 @@ describe('Methods', () => {
 
       ['fileName.', '.txt', ''].forEach(path => {
         expect(() => mediaType.delete(path, 'application/x-test')).toThrow(new SyntaxError('Invalid extension'))
-      })
-    })
-
-    test('Given that one wants to delete a new media type in the module list by passing an invalid mediaTypes argument', () => {
-      const mediaType = new MediaTypes(-1);
+      });
 
       [-1, 0, 1, false, null, NaN, Infinity, {}, []].forEach(mediaTypes => {
         expect(() => mediaType.delete('test', mediaTypes)).toThrow(new TypeError('Invalid mediaType'))
@@ -275,6 +272,11 @@ describe('Methods', () => {
       ['application', 'application/', '/x-test', ''].forEach(mediaTypes => {
         expect(() => mediaType.delete('test', mediaTypes)).toThrow(new SyntaxError('Invalid mediaType'))
       })
+
+      expect(() => mediaType.delete(undefined, undefined)).toThrowError(new AggregateError([
+        'Invalid extension',
+        'Invalid mediaType'
+      ], 'Invalid arguments'))
     })
 
     test('Given that one wants to delete an existing media type in the module list', () => {
@@ -335,7 +337,7 @@ describe('Methods', () => {
 
       expect(mediaType.delete(extension, contentType)).toBeTruthy()
 
-      await expect(mediaType.update()).resolves.toBeNull()
+      await expect(mediaType.update()).resolves.toStrictEqual({})
 
       await expect(mediaType.update(true).then(res => {
         return Object.keys(res)
@@ -361,7 +363,7 @@ describe('Fetch', () => {
 
     const mediaType = new MediaTypes(-1)
 
-    return expect(mediaType.update()).resolves.toBeNull()
+    return expect(mediaType.update()).resolves.toStrictEqual({})
   })
 
   test('Given that one wants to try to update the list of media types at some point and there was an error processing the media types or the file extension', () => {
@@ -381,7 +383,7 @@ describe('Fetch', () => {
 
     const mediaType = new MediaTypes(-1)
 
-    return expect(mediaType.update()).resolves.toBeNull()
+    return expect(mediaType.update()).resolves.toStrictEqual({})
   })
 
   test('Given that the update method was called and the request returns an invalid data type', () => {
@@ -398,7 +400,7 @@ describe('Fetch', () => {
 
     const mediaType = new MediaTypes(-1)
 
-    return expect(mediaType.update()).resolves.toBeNull()
+    return expect(mediaType.update()).resolves.toStrictEqual({})
   })
 
   test('Given that the update method was called and the request does not have an etag header', () => {
@@ -414,7 +416,7 @@ describe('Fetch', () => {
 
     const mediaType = new MediaTypes(-1)
 
-    return expect(mediaType.update()).resolves.toBeNull()
+    return expect(mediaType.update()).resolves.toStrictEqual({})
   })
 
   test('Given that the update method was called and the request returns an error', () => {
@@ -431,7 +433,7 @@ describe('Fetch', () => {
 
     const mediaType = new MediaTypes(-1)
 
-    return expect(mediaType.update()).resolves.toBeNull()
+    return expect(mediaType.update()).resolves.toStrictEqual({})
   })
 
   test('Given that the update method was called and the fetch function throws an exception', () => {
@@ -443,7 +445,7 @@ describe('Fetch', () => {
 
     const mediaType = new MediaTypes(-1)
 
-    return expect(mediaType.update()).resolves.toBeNull()
+    return expect(mediaType.update()).resolves.toStrictEqual({})
   })
 
   test('Given that the update method was called and the fetch function is rejected', () => {
@@ -455,7 +457,7 @@ describe('Fetch', () => {
 
     const mediaType = new MediaTypes(-1)
 
-    return expect(mediaType.update()).resolves.toBeNull()
+    return expect(mediaType.update()).resolves.toStrictEqual({})
   })
 })
 

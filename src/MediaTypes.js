@@ -13,6 +13,9 @@ function removeDuplicates (array) {
  * @class
  * @classdesc This is a comprehensive compilation of media types that may be periodically updated
  *
+ * @emits MediaTypes#update
+ * @emits MediaTypes#error
+ *
  * @typedef {Object} Versions
  * @property {string} Versions.apache
  * @property {string} Versions.debian
@@ -33,9 +36,6 @@ class MediaTypes {
    * @constructor
    * @param {number} [updateInterval=86400000] - Periodic database update in milliseconds. if less than zero, will be disabled
    * @see https://developer.mozilla.org/en-US/docs/Web/API/setInterval#delay
-   *
-   * @fires MediaTypes#update
-   * @fires MediaTypes#error
    *
    * @throws {TypeError} Invalid updateInterval
    */
@@ -63,7 +63,7 @@ class MediaTypes {
     this.updateInterval = updateInterval
   }
 
-  #isMediaType = mediaType => {
+  #isMediaType (mediaType) {
     try {
       return new MIMEType(mediaType)
     } catch (err) {
@@ -71,7 +71,7 @@ class MediaTypes {
     }
   }
 
-  #updateList = content => {
+  #updateList (content) {
     const list = {}
 
     for (let extension in content) {
@@ -95,7 +95,7 @@ class MediaTypes {
     return list
   }
 
-  #load = async res => {
+  async #load (res) {
     return {
       version: res.headers.get('etag'),
       content: (await res.text())
@@ -131,11 +131,9 @@ class MediaTypes {
    * @method
    * @param {boolean} [force=false] - Force update even if no version changes
    *
-   * @fires MediaTypes#update
-   *
-   * @return {Promise<null | Object.<string, MIMEType[]>>} List of all extensions with their media types
+   * @return {Promise<Object.<string, MIMEType[]>>} List of all extensions with their media types
    */
-  update = (force = false) => {
+  update (force = false) {
     return Promise.allSettled([
       fetch('https://raw.githubusercontent.com/apache/httpd/trunk/docs/conf/mime.types', { // https://github.com/apache/httpd/blob/trunk/docs/conf/mime.types
         method: 'HEAD',
@@ -222,7 +220,7 @@ class MediaTypes {
       }
 
       if (!Object.keys(list).length) {
-        return null
+        return {}
       }
 
       fs.writeFileSync(join(__dirname, 'DB.json'), JSON.stringify({
@@ -251,34 +249,11 @@ class MediaTypes {
   }
 
   /**
-   * @return {Object.<string, MIMEType[]>}
-   */
-  get list () {
-    return this.#mediaTypes
-  }
-
-  /**
-   * @type {number}
-   */
-  get updateInterval () {
-    return this.#updateInterval
-  }
-
-  /**
-   * @return {Versions}
-   */
-  get versions () {
-    return this.#versions
-  }
-
-  /**
    * @type {number} [updateInterval=86400000]
-   * @see https://developer.mozilla.org/en-US/docs/Web/API/setInterval#delay
-   *
-   * @fires MediaTypes#update
-   * @fires MediaTypes#error
    *
    * @throws {TypeError} Invalid updateInterval
+   *
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/setInterval#delay
    */
   set updateInterval (updateInterval = 86400000) {
     if (
@@ -311,6 +286,27 @@ class MediaTypes {
   }
 
   /**
+   * @type {number}
+   */
+  get updateInterval () {
+    return this.#updateInterval
+  }
+
+  /**
+   * @return {Versions}
+   */
+  get versions () {
+    return this.#versions
+  }
+
+  /**
+   * @return {Object.<string, MIMEType[]>}
+   */
+  get list () {
+    return this.#mediaTypes
+  }
+
+  /**
    * @method
    * @param {string} path - File path
    * @see https://nodejs.org/api/path.html#pathparsepath
@@ -320,7 +316,7 @@ class MediaTypes {
    *
    * @return {MIMEType[]}
    */
-  get = path => {
+  get (path) {
     if (typeof path !== 'string') {
       throw new TypeError('Invalid path')
     }
@@ -340,24 +336,31 @@ class MediaTypes {
    * @param {string} extension - File extension
    * @param {string} mediaType - {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type IANA media types}
    *
-   * @throws {TypeError} Invalid extension
-   * @throws {SyntaxError} Invalid extension
-   * @throws {TypeError} Invalid mediaType
-   * @throws {SyntaxError} Invalid mediaType
+   * @throws {TypeError|SyntaxError} Invalid extension
+   * @throws {TypeError|SyntaxError} Invalid mediaType
+   * @throws {AggregateError} Invalid arguments
    *
    * @return {boolean}
    */
-  set = (extension, mediaType) => {
+  set (extension, mediaType) {
+    const errors = []
+
     if (typeof extension !== 'string') {
-      throw new TypeError('Invalid extension')
+      errors.push(new TypeError('Invalid extension'))
     } else if (!this.#formatExtension.test(extension)) {
-      throw new SyntaxError('Invalid extension')
+      errors.push(new SyntaxError('Invalid extension'))
     }
 
     if (typeof mediaType !== 'string') {
-      throw new TypeError('Invalid mediaType')
+      errors.push(new TypeError('Invalid mediaType'))
     } else if (!this.#isMediaType(mediaType)) {
-      throw new SyntaxError('Invalid mediaType')
+      errors.push(new SyntaxError('Invalid mediaType'))
+    }
+
+    if (errors.length > 1) {
+      throw new AggregateError(errors, 'Invalid arguments')
+    } else if (errors.length === 1) {
+      throw errors.pop()
     }
 
     const content = {}
@@ -382,27 +385,34 @@ class MediaTypes {
    * @param {string} extension - File extension
    * @param {string} mediaType - {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types#structure_of_a_mime_type IANA media types}
    *
-   * @throws {TypeError} Invalid extension
-   * @throws {SyntaxError} Invalid extension
-   * @throws {TypeError} Invalid mediaType
-   * @throws {SyntaxError} Invalid mediaType
+   * @throws {TypeError|SyntaxError} Invalid extension
+   * @throws {TypeError|SyntaxError} Invalid mediaType
+   * @throws {AggregateError} Invalid arguments
    *
    * @return {boolean}
    */
-  delete = (extension, mediaType) => {
+  delete (extension, mediaType) {
+    const errors = []
+
     if (typeof extension !== 'string') {
-      throw new TypeError('Invalid extension')
+      errors.push(new TypeError('Invalid extension'))
     } else if (!this.#formatExtension.test(extension)) {
-      throw new SyntaxError('Invalid extension')
+      errors.push(new SyntaxError('Invalid extension'))
+    }
+
+    if (typeof mediaType !== 'string') {
+      errors.push(new TypeError('Invalid mediaType'))
+    } else if (!this.#isMediaType(mediaType)) {
+      errors.push(new SyntaxError('Invalid mediaType'))
+    }
+
+    if (errors.length > 1) {
+      throw new AggregateError(errors, 'Invalid arguments')
+    } else if (errors.length === 1) {
+      throw errors.pop()
     }
 
     extension = extension.trim().toLowerCase()
-
-    if (typeof mediaType !== 'string') {
-      throw new TypeError('Invalid mediaType')
-    } else if (!this.#isMediaType(mediaType)) {
-      throw new SyntaxError('Invalid mediaType')
-    }
 
     if (!(extension in this.#mediaTypes)) {
       return false
